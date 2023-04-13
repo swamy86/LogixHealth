@@ -1,0 +1,48 @@
+--1.Create a Table With Multiple Foreign Keys.
+--Create Customer table
+CREATE TABLE Customer(
+CustomerID INT PRIMARY KEY,
+customerName VARCHAR(20)
+);
+--Create Order table
+CREATE TABLE Orders(
+OrderID INT PRIMARY KEY,
+CustomerID INT FOREIGN KEY REFERENCES Customer(CustomerID),
+dataOrdered DATE
+);
+--Create Product table
+CREATE TABLE Product(
+ProductID INT PRIMARY KEY,
+productName VARCHAR(20)
+);
+--Create OrderDetails table
+CREATE TABLE OrderDetails(
+OrderID INT FOREIGN KEY REFERENCES Orders(OrderID),
+ProductID INT FOREIGN KEY REFERENCES Product(ProductID),
+quantity INT
+);
+
+
+--2.
+--Create Parent table
+CREATE TABLE Parent(
+pName VARCHAR(20),
+PIN INT PRIMARY KEY
+);
+--Create CHILD table
+CREATE TABLE Child(
+fName VARCHAR(10),
+lName VARCHAR(10),
+adress VARCHAR(20),
+PIN INT FOREIGN KEY REFERENCES Parent(PIN)
+ON DELETE CASCADE
+);
+
+--Insert records in parent table
+INSERT INTO Parent VALUES('x',1),('y',2),('z',3);
+
+--Insert records in child table
+INSERT INTO Child VALUES('a','b','vizag',1),('c','d','vizag',1),('e','d','vijaywada',2);
+
+--Delete records
+DELETE FROM Parent WHERE PIN=1;
