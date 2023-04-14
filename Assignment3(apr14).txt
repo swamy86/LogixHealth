@@ -1,0 +1,81 @@
+--Create BOOKS table
+CREATE TABLE BOOKS(
+Book_Id VARCHAR(10) PRIMARY KEY,
+Book_Name VARCHAR(20),
+Author_Name VARCHAR(20),
+Publishers VARCHAR(20),
+Price INT,
+Type VARCHAR(20),
+Qty INT
+);
+
+--Create ISSUED table
+CREATE TABLE ISSUED(
+Book_Id VARCHAR(10) FOREIGN KEY REFERENCES BOOKS(Book_Id),
+Quantity_Issued INT
+);
+
+--Insert records in BOOKS table
+INSERT INTO BOOKS VALUES ('C0001','Fast Cook','Lata Kapoor','EPB',355,'Cookery',5),
+('F0001','The Tears','William Hopkins','First Publ',650,'Fiction',20),
+('T0001','My First C++','Brain and Brook','EPB',350,'Text',10),
+('T0002','C++ Brain Works','AW Rossaine','TDH',350,'Text',15),
+('F0002','Thunderbolts','Anna Roberts','First Publ',750,'Fiction',50);
+
+--Insert records in ISSUED table
+INSERT INTO ISSUED VALUES ('T0001',4),('C0001',5),('F0001',2);
+
+
+--1. Consider the tables BOOKS and ISSUED given below. Write command for (i) to (viii) and output for (ix) to (xi).
+--(i) To show Book_Name, Author_Name, Price and Quantity_Issued of books of First Publ publishers and Book_Id is present in ISSUED.																		
+SELECT Book_Name, Author_Name, Price , Quantity_Issued 
+FROM BOOKS,ISSUED WHERE BOOKS.Book_Id=ISSUED.Book_Id AND Publishers='First Publ';
+
+--(ii) To list the names from books of text type whose Book_Id is present in ISSUED table.
+SELECT Book_Name FROM BOOKS,ISSUED WHERE BOOKS.Book_Id=ISSUED.Book_Id AND Type='Text';
+
+--(iii) To display the Book_Name and Price from table BOOKS in ascending order of their Price.
+SELECT Book_Name, Price FROM BOOKS ORDER BY Price;
+
+--(iv) To increase the price of all books of EPB Publishers by 50.
+UPDATE BOOKS SET Price=Price+50 WHERE Publishers='EPB'
+
+--(v) To show Book_Name, Type and Quantity_Issued of books of EPB publishers and Book_Id is present in ISSUED. Filter the records such that the Quantity_Issued is greater than 4.															
+SELECT Book_Name,Type,Quantity_Issued FROM Books,ISSUED 
+where BOOKS.Book_Id = ISSUED.Book_Id AND Publishers='EPB' AND Quantity_Issued>4 ;
+
+--(vi) Fetch all the Issued books with details like Book_Id, Book_Name, Quantity_Issued.
+SELECT BOOKS.Book_Id,Book_Name,Quantity_Issued FROM BOOKS,ISSUED WHERE BOOKS.Book_Id = ISSUED.Book_Id;
+
+--(vii) Fetch the Book_Id, Book_Name, Author_Name of those books which were issued for the maximum time.
+SELECT BOOKS.Book_Id,Book_Name,Author_Name FROM BOOKS,ISSUED 
+WHERE BOOKS.BOOK_ID=ISSUED.BOOK_ID AND Quantity_Issued IN (SELECT MAX(Quantity_Issued) FROM ISSUED);
+
+--(viii) Fetch all the details of non-issued books.
+SELECT * FROM BOOKS WHERE Book_Id NOT IN(SELECT Book_Id FROM ISSUED);
+
+
+--PRINT output for (ix) to (xi).
+--(ix) SELECT COUNT(*) FROM BOOKS;	
+Ans: 5
+--(x) SELECT MAX(Price) FROM BOOKS WHERE Qty >= 15;
+Ans: 750
+SELECT MAX(Price) FROM BOOKS WHERE Qty >= 15;
+--(xi) SELECT Book_Name, Author_Name FROM BOOKS WHERE Publishers ='EPB' ;
+Ans:
+Book_Name	        Author_Name
+Fast Cook         Lata Kapoor
+My First C++      Brain and Brook
+
+
+--2.Take a table of your choice.Implement Self Join.
+
+--Create Customers table
+CREATE TABLE Customers(
+CustomerId INT PRIMARY KEY,
+CustomerName VARCHAR(20),
+City VARCHAR(10),
+);
+--Self Join
+SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2, A.City
+FROM Customers A, Customers B WHERE A.CustomerID <> B.CustomerID AND A.City = B.City ORDER BY A.City;
