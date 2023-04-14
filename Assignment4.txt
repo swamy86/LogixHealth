@@ -1,0 +1,43 @@
+--Create FABRIC table
+CREATE TABLE FABRIC(
+Fcode VARCHAR(10) PRIMARY KEY,
+Type VARCHAR(20)
+);
+
+--Create GARMENT table
+CREATE TABLE GARMENT(
+Gcode INT PRIMARY KEY,
+Description VARCHAR(20),
+Price INT,
+Fcode VARCHAR(10) FOREIGN KEY REFERENCES FABRIC(Fcode),
+ReadyDate DATE
+);
+
+
+--Insert records in FABRIC table
+INSERT INTO FABRIC VALUES ('F04','Polyster'),('F02','Cotton'),('F03','Silk'),('F01','Terelene');
+
+--Insert records in GARMENT table
+INSERT INTO GARMENT VALUES (10023,'Pencil Skirt',1150,'F03','10-12-19'),
+(10001,'Formal Shirt',1250,'F01','10-01-12'),
+(10012,'Informal Shirt',1550,'F02','10-01-06'),
+(10024,'Baby Top',750,'F03','07-04-09'),
+(10090,'Tulip Skirt',850,'F02','09-03-31'),
+(10019,'Evening Gown',850,'F03','10-06-06'),
+(10009,'Informal Pant',1500,'F02','10-09-20'),
+(10017,'Format Pant',1350,'F01','09-03-09'),
+(10020,'Frock',850,'F04','09-08-09'),
+(10089,'Slacks',750,'F03','10-09-31')
+
+
+--a. To display the details of all GARMENTS, which have ReadyDate in between 08-Dec-09 and 16-Jun-10 (inclusive of both the dates).																		
+SELECT * FROM GARMENT WHERE ReadyDate BETWEEN '09-12-08' AND '10-06-16';
+
+--b. To display FABRIC wise highest and lowest price of GARMENTS from GARMENT table (Display Fcode of each GARMENT alongwith highest and lowest price).																
+SELECT Fcode, MAX(Price) AS [Highest Price], MIN(Price) AS [Lowest Price] FROM GARMENT GROUP BY Fcode;
+
+--c. To display the Gcode and Description from table GARMENT and Type from table FABRIC, with their corresponding matching Fcode.																		
+SELECT Gcode,Description,Type FROM GARMENT G, FABRIC F WHERE G.Fcode=F.FCODE;
+
+--d. To display the details of all the garments which are made from Cotton fabric.
+SELECT G.*  FROM GARMENT G , FABRIC F WHERE G.Fcode=F.Fcode AND Type='Cotton';
