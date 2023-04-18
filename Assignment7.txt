@@ -94,7 +94,7 @@ join Salesman on salesman.salesman_id = orders.salesman_id;
 --(7) To display the Customer_Name, Customer_City, Grade, Salesman_Name, Salesman_City.
 --The results should be sorted by ascending order of Customer_Id.
 Select customer_name, customer.city, grade, name, salesman.city
-from customer  left join salesman on customer.salesman_id = salesman.salesman_id 
+from customer join salesman on customer.salesman_id = salesman.salesman_id 
 order by customer_id;
 
 
