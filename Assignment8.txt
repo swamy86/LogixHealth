@@ -1,0 +1,48 @@
+--(a) Find all salespeople and customers located in the city of London.
+SELECT salesman_id "ID", name,'salesman'
+FROM salesman
+WHERE city='London'
+UNION
+SELECT customer_id "ID", customer_name,'customer'
+FROM customer
+WHERE city='London';
+
+
+--(b) Find distinct salespeople and their cities. Return Salesperson_ID and City. Refer SALESMAN and CUSTOMER relations.
+SELECT salesman_id, city
+FROM customer
+UNION
+SELECT salesman_id, city
+FROM salesman;
+
+
+--(c)Find all those salespeople and customers who are involved in the inventory management system. Return Salesperson_ID, Customer_ID.
+SELECT salesman_id, customer_id
+FROM customer
+UNION 
+SELECT salesman_id, customer_id
+FROM orders;
+
+
+--(d)Find the salespersons who generated the Largest and Smallest orders on each date. 
+--   Return Salesperson_ID, Name, Order_No, Highest On / Lowest On, Order_Date.
+SELECT salesman.salesman_id, name, order_no, 'highest on', order_date
+FROM salesman, orders
+WHERE salesman.salesman_id =orders.salesman_id
+AND purchase_amt IN (SELECT MAX (purchase_amt) FROM orders GROUP BY order_date)
+UNION
+SELECT salesman.salesman_id, name, order_no, 'LOWEST on', order_date
+FROM salesman, orders
+WHERE salesman.salesman_id =orders.salesman_id
+AND purchase_amt IN (SELECT MIN (purchase_amt) FROM orders GROUP BY order_date);
+
+
+--(e) Create a union of two queries that shows the Customer_ID, Cities, and Ratings of all customers. 
+--Those with a rating of 300 or greater will have the words 'High Rating', while the others will have the words 'Low Rating'.
+SELECT customer_id, city, grade, 'High Rating'
+FROM customer
+WHERE grade >= 300
+UNION
+(SELECT customer_id, city, grade, 'Low Rating'
+FROM customer
+WHERE grade < 300)
