@@ -101,7 +101,7 @@ order by customer_id;
 --(8) To find those customers with a grade less than 300. Return Customer_Name, Customer_City, Grade, Salesman_Name, Salesman_City. 
 --The results should be sorted by ascending order of Customer_Id.
 Select customer_name, customer.city, grade, name, salesman.city
-from customer left join salesman on customer.salesman_id = salesman.salesman_id
+from customer join salesman on customer.salesman_id = salesman.salesman_id
 where grade < 300
 order by customer_id;
 
