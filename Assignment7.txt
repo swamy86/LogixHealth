@@ -87,7 +87,7 @@ where comission > 0.12 and customer.City != salesman.City;
 
 --(6)To find the details of an order. Return Order_No, Order_Date, Purchase_Amount, Customer_Name, Grade, Salesman_Name, Commission.
 Select order_no,order_date, purchase_amt, customer_name, grade, name,comission 
-from orders join customer on customer.customer_id= orders.customer_id 
+from orders join customer on customer.salesman_id= orders.salesman_id 
 join Salesman on salesman.salesman_id = orders.salesman_id;
 
 
