@@ -1,0 +1,20 @@
+CREATE VIEW ordersview
+AS SELECT order_date, purchase_amt, order_no,
+customer_name
+FROM orders, customer
+WHERE orders.customer_id=customer.customer_id;
+
+SELECT * FROM ordersview;
+
+
+CREATE VIEW view1
+AS SELECT *
+FROM customer;
+SELECT * FROM view1;
+
+CREATE VIEW view2
+AS SELECT *
+FROM orders;
+SELECT * FROM view2;
+
+SELECT * FROM view1 INNER JOIN view2 ON view1.customer_id=view2.customer_id;
