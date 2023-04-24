@@ -1,3 +1,4 @@
+--TASK1
 CREATE VIEW ordersview
 AS SELECT order_date, purchase_amt, order_no,
 customer_name
@@ -18,3 +19,28 @@ FROM orders;
 SELECT * FROM view2;
 
 SELECT * FROM view1 INNER JOIN view2 ON view1.customer_id=view2.customer_id;
+
+--TASK2
+--1.Deep Dive into Transaction Control Language (TCL) Commands.
+SELECT *FROM ISSUED;
+
+BEGIN TRANSACTION;
+UPDATE ISSUED SET Quantity_Issued=3 WHERE Book_Id='F0001';
+ROLLBACK;
+
+BEGIN TRANSACTION;
+UPDATE ISSUED SET Quantity_Issued=4 WHERE Book_Id='F0001';
+COMMIT;
+
+--2.Explore whether Transaction Operations, i.e, COMMIT and ROLLBACK can be performed in a Table Variable or not.
+DECLARE @TABLE1 TABLE(
+Book_Id VARCHAR(10),
+Quantity_Issued INT
+);
+INSERT INTO @TABLE1 VALUES ('T0001',4),('C0001',5),('F0001',2);
+
+BEGIN TRANSACTION;
+UPDATE ISSUED SET Quantity_Issued=3 WHERE Book_Id='F0001';
+ROLLBACK;
+
+SELECT *FROM @TABLE1;
