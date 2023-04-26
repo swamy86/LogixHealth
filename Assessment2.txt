@@ -176,9 +176,10 @@ from LMS_BOOK_ISSUE t2,LMS_MEMBERS m,LMS_BOOK_DETAILS b where t2.MEMBER_ID=m.MEM
 
 --(25) Write a query to display the member id, member name and number of remaining books he/she can take with “REMAININGBOOKS” as alias
   --name. HINT: Assuming a member can take maximum 3 books.
-select t.MEMBER_ID,MEMBER_NAME,t3.c1 as REMAINING_BOOKS from LMS_MEMBERS t inner join 
-(select t1.member_id,COUNT(t2.MEMBER_ID) as c1 from LMS_MEMBERS t1 left outer join
-LMS_BOOK_ISSUE t2 on t1.MEMBER_ID= t2.MEMBER_ID group by t1.MEMBER_ID) t3 on t3.MEMBER_ID=t.MEMBER_ID;
+SELECT t1.MEMBER_ID,MEMBER_NAME,3-COUNT(t1.MEMBER_ID) AS REMAININGBOOKS
+FROM LMS_BOOK_ISSUE t1,LMS_MEMBERS t2 WHERE t2.MEMBER_ID=t1.MEMBER_ID
+GROUP BY t1.MEMBER_ID,t2.MEMBER_NAME;
+
 
 --(26) Write a query to display only the first three records of LMS_SUPPLIERS_DETAILS table.
 SELECT TOP 3 * FROM LMS_SUPPLIERS_DETAILS;
@@ -193,4 +194,4 @@ EXEC SP_RENAME 'LMS_MEMBERS','LMS_MEMBERS_DETAILS';
 TRUNCATE TABLE LMS_FINE_DETAILS;
 
 --(30) Write a query to select all the name of the books. [Without Asterisk (*) Operator]
-SELECT BOOK_CODE,BOOK_TITLE,CATEGORY,AUTHOR,PUBLICATION,PUBLISH_DATE,BOOK_EDITION,PRICE,RACK_NUM,DATE_ARRIVAL,SUPPLIER_ID FROM LMS_BOOK_DETAILS
+SELECT ALL BOOK_TITLE FROM LMS_BOOK_DETAILS;
