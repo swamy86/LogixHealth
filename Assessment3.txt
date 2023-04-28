@@ -1,0 +1,177 @@
+--Create DEPARTMENT table
+CREATE TABLE DEPARTMENT(
+deptno INT PRIMARY KEY,
+dname VARCHAR(30),
+loc VARCHAR(30)
+);
+
+--Insert records
+INSERT INTO DEPARTMENT VALUES
+(10,'Accounting','New Delhi'),
+(20,'Research','Chennai'),
+(30,'Sales','Kolkata'),
+(40,'Operations','Mumbai'),
+(50,'Marketing','Banglore'),
+(60,'Production','Ahmedabad');
+
+--Create employee table
+CREATE TABLE EMPLOYEE(
+empno INT PRIMARY KEY,
+ename VARCHAR(30),
+job VARCHAR(30),
+manager INT,
+hiredate DATE,
+salary INT,
+commission INT,
+deptno INT FOREIGN KEY REFERENCES DEPARTMENT(deptno)
+);
+
+--Insert records
+INSERT INTO EMPLOYEE VALUES
+(8369,'Smith','CLERK',8902,'1990-12-18',800,null,20),
+(8499,'Anya','SALESMAN',8698,'1991-02-20',1600,300,30),
+(8521,'Seth','SALESMAN',8698,'1991-02-22',1250,500,30),
+(8566,'Mahadevan','MANAGER',8839,'1991-04-02',2985,null,20),
+(8654,'Momin','SALESMAN',8698,'1991-09-28',1250,1400,30),
+(8698,'Bina','MANAGER',8839,'1991-05-01',2850,null,30),
+(8882,'Shiavnsh','MANAGER',8839,'1991-06-09',2450,null,10),
+(8888,'Scott','ANALYST',8566,'1992-12-09',3000,null,20),
+(8839,'Amir','PRESIDENT',null,'1991-11-18',5000,null,10),
+(8844,'Kuldeep','SALESMAN',8698,'1991-09-08',1500,0,30),
+(8886,'Anoop','CLERK',8888,'1993-01-12',1100,null,20),
+(8100,'Yash','ANALYST',null,'2003-05-03',6000,null,20),
+(8900,'Jatin','CLERK',8698,'1991-12-03',950,null,30),
+(8902,'Fakir','ANALYST',8566,'1991-12-03',3500,null,20);
+
+
+
+
+1. To find those employees who receive a higher salary than the employee with ID 8844. Return ename
+SELECT ename FROM employee
+WHERE salary > 
+( SELECT salary  
+FROM employee
+WHERE empno=8844
+);
+
+2. To find out which employees have the same designation as the employee whose ID is 8900. Return ename, deptno and job.
+SELECT ename, deptno,job FROM employee
+WHERE job=  
+( SELECT job FROM employee WHERE empno=8900);
+
+3. To find those employees whose salary matches the lowest salary of any of the departments. Return ename and deptno.
+SELECT ename, deptno FROM employee  
+WHERE salary IN  
+( SELECT MIN(salary)  
+FROM employee
+GROUP BY deptno
+);
+
+4. To find those employees who earn more than the average salary. Return empno, ename, deptno.
+SELECT empno, ename, deptno
+FROM employee 
+WHERE salary >  
+( SELECT AVG(salary)  
+FROM employee
+);
+
+5. To find those employees who report to that manager whose code is 8566. Return ename, empno and salary.
+SELECT ename, empno, salary
+FROM employee 
+WHERE manager= 8566;
+
+6. To find all those employees who work in the Marketing department. Return deptno, ename, job, and dname.
+SELECT e.deptno, ename, job , dname  
+FROM employee e , department d  
+WHERE e.deptno= d.deptno
+AND  dname = 'Marketing';
+
+7. To find the employee whose salary is 5000 and reporting person’s ID is 8566. Return all fields.
+SELECT * FROM EMPLOYEE
+WHERE SALARY='5000' AND empno in (select manager from employee 
+where empno=8566)
+
+8. To find those employees whose ID matches any of the numbers 8566, 8884 and 8521. Return all the fields.
+SELECT *
+FROM employee 
+WHERE empno IN (8566,8884,8521);
+
+9. To find those employees whose salary falls within the range of the smallest salary and 2500. Return all the fields.
+SELECT * FROM employee
+WHERE salary BETWEEN  
+(SELECT MIN(salary) 
+FROM employee) AND 2500;
+
+10. To find those employees who get second-highest salary. Return all the fields of the employees.
+SELECT * FROM employee
+WHERE empno IN 
+(SELECT empno FROM employee
+WHERE salary = 
+(SELECT MAX(salary) FROM employee 
+WHERE salary < 
+(SELECT MAX(salary) FROM employee)));
+
+11. To find those employees who earn more than the average salary 
+and work in the same department as an employee whose ename contains the letter 'M'.
+SELECT * FROM employee WHERE salary>(SELECT AVG(salary) FROM 
+employee) AND deptno IN (SELECT deptno FROM employee WHERE 
+ename LIKE '%M%');
+
+12. To find those employees whose department is located at 
+‘Chennai’. Return ename, empno, job.
+SELECT ename,empno,job from employee WHERE deptno IN(SELECT deptno
+FROM department WHERE loc='Chennai');
+
+13. To find those employees whose salary is lower than that of 
+employees whose job title is ‘Analyst’. Return empno, ename, job.
+SELECT  empno, ename, job FROM EMPLOYEE WHERE SALARY<(
+SELECT MIN(SALARY) FROM EMPLOYEE WHERE JOB='Analyst');
+
+14. To find those employees whose salary is lower than that of 
+employees whose job title is 'Analyst'. Exclude employees of Job 
+title ‘Analyst’. Return empno, ename, job.
+SELECT empno, ename, job FROM employee WHERE salary<(
+SELECT MIN(salary) FROM employee WHERE job='Analyst') AND job != 'Analyst';
+
+15. To calculate total salary of the departments where at least 
+one employee works. Return deptno, total salary.
+SELECT deptno,SUM(salary) AS total_salary
+FROM employee GROUP BY(deptno);
+
+16. To display the empno, ename, salary and the SalaryStatus 
+column with a title HIGH and LOW respectively for those employees
+whose salary is more than and less than the average salary of all
+employees.
+SELECT  empno,  ename, salary,'HIGH'  AS SalaryStatus
+FROM employee
+WHERE salary >
+(SELECT AVG(salary) FROM employee)
+UNION
+SELECT  empno,  ename, salary,'LOW'  AS SalaryStatus
+FROM employee
+WHERE salary <
+(SELECT AVG(salary) FROM employee)
+
+17. Find only those departments who have employees.
+SELECT * FROM department WHERE deptno IN(
+SELECT deptno FROM EMPLOYEE);
+
+18. Find the employees who earn the highest salary in each 
+department.
+SELECT * FROM employee 
+WHERE salary IN
+(SELECT max(salary) FROM employees
+GROUP BY deptno) ;
+
+19. To find those employees whose salaries exceed 50% of their 
+departments total salary bill. Return ename.
+SELECT ename FROM employee e1
+WHERE salary > 
+(SELECT (SUM(salary))*.5 
+FROM employees e2 
+WHERE e1.deptno=e2.deptno);
+
+20. To find those employees who joined after the employee whose 
+ID is 8566. Return ename and hiredate.
+SELECT ename,hiredate FROM EMPLOYEE WHERE hiredate>(SELECT 
+hiredate FROM EMPLOYEE WHERE empno=8566)
