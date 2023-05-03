@@ -1,0 +1,142 @@
+--Multi Statment Table Valued Function
+--1
+CREATE FUNCTION fn_GetCustomersWithOrdersDetails ()
+RETURNS @CustomersWithOrders TABLE 
+(CustomerID int, CustomerName nvarchar(50), 
+Orderid int,orderdate date,city varchar(50))
+AS
+BEGIN
+   INSERT INTO @CustomersWithOrders
+   SELECT c.customer_id, c.CUSTOMER_Name, 
+   order_NO ,order_date,city
+   FROM Customer c
+   JOIN Orders o ON c.customer_id = o.customer_id
+  
+   RETURN
+END 
+
+SELECT * FROM fn_GetCustomersWithOrdersDetails();
+
+
+--2
+CREATE FUNCTION fn_GetEmployeeDetailsByName(@Name VARCHAR(40))
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),salary int,deptno int)
+AS
+BEGIN
+   INSERT INTO @employeeTable
+   SELECT ENO,ENAME,SAL,DEPT FROM EMPLOYEE WHERE ENAME=@Name
+   RETURN
+END 
+
+SELECT * FROM fn_GetEmployeeDetailsByName('akash');
+
+--3
+CREATE FUNCTION fn_GetEmployeeDetails(@salary INTEGER)
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),salary int,job varchar(20))
+AS
+BEGIN
+   INSERT INTO @employeeTable
+   SELECT ENO,ENAME,SAL,JOB FROM EMPLOYEE WHERE SAL>@salary
+   RETURN
+END 
+
+SELECT * FROM fn_GetEmployeeDetails(8000);
+
+
+--4
+CREATE FUNCTION fn_GetJobs()
+RETURNS @employeeTable TABLE 
+(jobName varchar(50))
+AS
+BEGIN
+   INSERT INTO @employeeTable
+   SELECT DISTINCT JOB FROM EMPLOYEE
+   RETURN
+END 
+
+SELECT * FROM fn_GetJobs();
+
+
+--5
+CREATE FUNCTION fn_CountTotalBooks()
+RETURNS @Table TABLE 
+(countbooks int)
+AS
+BEGIN
+   INSERT INTO @Table
+   SELECT COUNT(*) FROM BOOKS
+RETURN
+END 
+
+SELECT * FROM fn_CountTotalBooks();
+
+--6
+CREATE FUNCTION fn_GetMaxSalary()
+RETURNS @Table TABLE 
+(max_salary int,deptno int)
+AS
+BEGIN
+   INSERT INTO @Table
+   SELECT MAX(SAL) AS MAXSALARY,DEPT FROM EMPLOYEE GROUP BY DEPT
+RETURN
+END 
+
+SELECT * FROM fn_GetMaxSalary();
+
+
+--7
+CREATE FUNCTION fn_GetEmployeeDetail()
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),salary int,deptno int)
+AS
+BEGIN
+   INSERT INTO @employeeTable
+   SELECT ENO,ENAME,SAL,DEPT FROM EMPLOYEE WHERE ENAME LIKE 's%'
+   RETURN
+END 
+
+SELECT * FROM fn_GetEmployeeDetail();
+
+
+--8
+CREATE FUNCTION fn_GetMinSalary()
+RETURNS @Table TABLE 
+(max_salary int,deptno int)
+AS
+BEGIN
+   INSERT INTO @Table
+   SELECT MIN(SAL) AS MINSALARY,DEPT FROM EMPLOYEE GROUP BY DEPT
+RETURN
+END 
+
+SELECT * FROM fn_GetMinSalary();
+
+
+--9
+CREATE FUNCTION fn_GetAvgSalary()
+RETURNS @Table TABLE 
+(avg_salary int,deptno int)
+AS
+BEGIN
+   INSERT INTO @Table
+   SELECT avg(SAL) AS avgSALARY,DEPT FROM EMPLOYEE GROUP BY DEPT
+RETURN
+END 
+
+SELECT * FROM fn_GetAvgSalary();
+
+--10
+CREATE FUNCTION fn_GetTotalSalary()
+RETURNS @Table TABLE 
+(total_salary int,deptno int)
+AS
+BEGIN
+   INSERT INTO @Table
+   SELECT SUM(SAL) AS TOTALSALARY,DEPT FROM EMPLOYEE GROUP BY DEPT
+RETURN
+END 
+
+SELECT * FROM fn_GetTotalSalary();
+
