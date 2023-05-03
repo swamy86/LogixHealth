@@ -201,3 +201,13 @@ AS
 RETURN(SELECT ENAME FROM EMPLOYEE WHERE ENAME LIKE 's%')
 
 SELECT * FROM Function20();
+
+
+
+CREATE FUNCTION fn_GetAllBooksDetails()
+RETURNS TABLE
+AS
+RETURN(SELECT * FROM Books)
+SELECT * FROM fn_GetAllBooksDetails();
+
+SELECT B.*,Quantity_Issued FROM fn_GetAllBooksDetails() AS B,ISSUED WHERE B.Book_Id = ISSUED.Book_Id
