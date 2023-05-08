@@ -1,0 +1,208 @@
+--1. WITHOUT PARAMETERS
+CREATE PROCEDURE spGetEmployeeNames
+AS  
+BEGIN  
+    SELECT TOP 10 ENAME FROM EMPLOYEE  
+END 
+EXEC spGetEmployeeNames
+
+CREATE PROCEDURE spGetMaxPrice
+AS  
+BEGIN  
+   SELECT MAX(Price) FROM BOOKS  
+END
+EXEC spGetMaxPrice
+
+
+CREATE PROCEDURE spGetMinPrice
+AS  
+BEGIN  
+   SELECT MIN(Price) FROM BOOKS  
+END
+EXEC spGetMinPrice
+
+
+CREATE PROCEDURE spEmployeeDetails
+AS  
+BEGIN  
+   SELECT * FROM EMPLOYEE  
+END 
+EXEC spEmployeeDetails
+
+CREATE PROCEDURE spEmployeeDetailsDeptno
+AS
+BEGIN
+     SELECT * FROM EMPLOYEE where DEPT=30
+END
+EXEC spEmployeeDetailsDeptno
+
+
+--2.INPUT PARAMETERS
+CREATE PROCEDURE spGetCustomers 
+@City varchar(30)
+AS
+BEGIN
+SELECT * FROM CUSTOMER WHERE CITY = @City
+END
+EXEC spGetCustomers @City = 'London'
+
+CREATE PROCEDURE spGetEmployees 
+@salary int
+AS
+BEGIN
+SELECT * FROM EMPLOYEE WHERE SAL>@salary
+END
+EXEC spGetEmployees 6000
+
+CREATE PROCEDURE spGetEmployees1 
+@JOBNAME VARCHAR(10)
+AS
+BEGIN
+SELECT ENAME FROM EMPLOYEE WHERE JOB = @JOBNAME
+END
+EXEC spGetEmployees1 'MANAGER'
+
+CREATE PROCEDURE spGetCountEmployees
+@DEPTNO INTEGER
+AS
+BEGIN
+SELECT COUNT(*) FROM EMPLOYEE WHERE DEPT = @DEPTNO
+END
+EXEC spGetCountEmployees 20
+
+CREATE PROCEDURE spEmployeesBysalary
+@salary1 INTEGER,
+@salary2 INTEGER
+AS
+BEGIN
+SELECT * FROM EMPLOYEE WHERE SAL BETWEEN @salary1 AND @salary2
+END
+EXEC spEmployeesBysalary 4000,6000
+
+
+
+--3.OUTPUT PARAMETERS
+CREATE PROCEDURE spGetTotalCount (
+@total_count INT OUTPUT
+) 
+AS
+BEGIN
+SELECT @total_count=count(*) FROM EMPLOYEE;
+END;
+DECLARE @count INT;
+EXECUTE spGetTotalCount @count OUTPUT
+PRINT @count
+
+
+CREATE PROCEDURE spGetEmployeeDeptnoCount
+@deptno_count INT OUTPUT
+AS
+BEGIN
+SELECT @deptno_count=COUNT(*) FROM EMPLOYEE WHERE DEPT=30
+END
+DECLARE @deptno INT
+EXECUTE spGetEmployeeDeptnoCount @deptno OUT
+PRINT @deptno
+
+
+CREATE PROCEDURE spEmployeeMinSalary
+@minsalary INT OUTPUT
+AS
+BEGIN
+SELECT @minsalary=MIN(SAL) FROM EMPLOYEE
+END
+DECLARE @salary INT
+EXECUTE spEmployeeMinSalary @salary OUT
+PRINT @salary
+
+
+
+CREATE PROCEDURE spEmployeeMaxSalary
+@maxsalary INT OUTPUT
+AS
+BEGIN
+SELECT @maxsalary=MAX(SAL) FROM EMPLOYEE
+END
+DECLARE @salary INT
+EXECUTE spEmployeeMaxSalary @salary OUT
+PRINT @salary
+
+
+
+CREATE PROCEDURE spGetEmployeeName
+@employee_name VARCHAR(30) OUTPUT
+AS
+BEGIN
+SELECT @employee_name=ename from EMPLOYEE WHERE job='MANAGER'
+END
+
+DECLARE @name varchar(20)
+EXECUTE spGetEmployeeName @name  OUTPUT
+PRINT @name
+
+
+
+--4.input/output paramters
+CREATE PROCEDURE spGetManagerId  
+@empId int,  
+@managerId int OUTPUT  
+AS  
+BEGIN  
+SELECT @managerId = MGR FROM Employee WHERE ENO = @empId  
+END
+DECLARE @manager int
+EXECUTE spGetManagerId 7521, @manager OUTPUT
+PRINT @manager
+
+
+
+Create Procedure spGetEmployeeDetails
+@EmployeeNo           INT,
+@name VARCHAR(30)         OUTPUT,
+@Job     VARCHAR(20)         OUTPUT
+AS
+BEGIN
+SELECT @name=ENAME,@Job=JOB FROM EMPLOYEE WHERE @EmployeeNo=ENO;
+END
+DECLARE @Ename VARCHAR(30)
+DECLARE @EmployeeJob VARCHAR(30)
+EXECUTE spGetEmployeeDetails 7499, @Ename OUTPUT,@EmployeeJob OUTPUT
+PRINT @Ename
+PRINT @EmployeeJob
+
+
+CREATE PROCEDURE spGetEmployeeCountByDeptno
+@dept_no INT,
+@count INT OUTPUT
+AS
+BEGIN
+SELECT @count = COUNT(*) FROM EMPLOYEE WHERE DEPT = @dept_no
+END
+DECLARE @count INT
+EXEC spGetEmployeeCountByDeptno 20, @count OUTPUT
+SELECT @count
+
+
+
+CREATE PROCEDURE spGetEmployeesCountByJob
+@Job VARCHAR(30),
+@count INT OUTPUT
+AS 
+BEGIN
+SELECT @count=COUNT(*) FROM EMPLOYEE WHERE JOB=@Job
+END
+DECLARE @count INT
+EXECUTE spGetEmployeesCountByJob 'PRESIDENT', @count OUTPUT
+PRINT @count
+
+
+CREATE PROCEDURE spGetEmployeeBySalary1
+@salary INT,
+@employee_name VARCHAR(30) OUTPUT
+AS 
+BEGIN
+SELECT @employee_name=ENAME FROM EMPLOYEE WHERE SAL=@salary 
+END
+DECLARE @employee_name varchar(20) 
+EXECUTE spGetEmployeeBySalary1 9000, @employee_name output
+PRINT @employee_name 
