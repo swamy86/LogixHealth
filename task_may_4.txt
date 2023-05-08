@@ -1,0 +1,94 @@
+--1
+CREATE TABLE tblProduct(
+ProductId Int Primary Key,
+Name Varchar(10),
+UnitPrice INT,
+QtyAvailable Int
+)
+INSERT INTO tblProduct VALUES(1,'Laptops',2340,100),(2,'Desktops',3467,50);
+--2
+CREATE TABLE tblProductSales(
+ProductSalesId Int Primary Key,
+ProductId Int FOREIGN KEY REFERENCES  tblProduct(ProductId),
+QuantitySold Int
+)
+select * from tblProduct;
+select * from tblProductSales;
+
+
+--create stored proc
+CREATE PROCEDURE spSellProduct
+@ProductId INT,
+@QuantityTosell INT
+AS
+BEGIN
+--Check the stock available for the product we want to sell.
+DECLARE @StockAvailable INT
+SELECT @StockAvailable=QtyAvailable FROM tblProduct WHERE ProductId = @ProductId
+--Throw an error to the calling application, if enough stock is not available.
+if(@StockAvailable < @QuantityToSell)
+BEGIN
+RAISERROR('Not Enough Stock Available', 16, 1);
+END
+--If enough stock available
+else
+BEGIN
+BEGIN TRAN
+--First reduce the quantity available
+UPDATE tblProduct
+SET QtyAvailable = (QtyAvailable-@QuantityToSell) WHERE ProductId = @Productid;
+--Calculate MAX Productsalesid
+DECLARE @MaxProductSalesId INT
+SELECT @MaxProductSalesId = CASE WHEN MAX(ProductSalesId) IS NULL THEN 0 else MAX(ProductSalesId) END FROM tblProductSales
+--Increment @MaxProductSalesId by 1, so we don't get a Primary Key Violation
+
+SET @MaxProductSalesId= @MaxProductSalesId + 1
+INSERT INTO tblProductSales VALUES (@MaxProductSalesId, @ProductId, @QuantityToSell);
+if (@@ERROR <> 0)
+ROLLBACK TRAN
+else
+COMMIT TRAN
+END
+END
+
+spSellProduct 1,10
+
+
+--create stored proc using try catch
+ALTER PROCEDURE spSellProduct
+@ProductId INT,
+@QuantityTosell INT
+AS
+BEGIN
+--Check the stock available for the product we want to sell.
+DECLARE @StockAvailable INT
+SELECT @StockAvailable=QtyAvailable FROM tblProduct WHERE ProductId = @ProductId
+--Throw an error to the calling application, if enough stock is not available.
+if(@StockAvailable < @QuantityToSell)
+BEGIN
+RAISERROR('Not Enough Stock Available', 16, 1);
+END
+--If enough stock available
+else
+BEGIN
+BEGIN TRY
+BEGIN TRAN
+--First reduce the quantity available
+UPDATE tblProduct
+SET QtyAvailable = (QtyAvailable-@QuantityToSell) WHERE ProductId = @Productid;
+--Calculate MAX Productsalesid
+DECLARE @MaxProductSalesId INT
+SELECT @MaxProductSalesId = CASE WHEN MAX(ProductSalesId) IS NULL THEN 0 else MAX(ProductSalesId) END FROM tblProductSales
+--Increment @MaxProductSalesId by 1, so we don't get a Primary Key Violation
+
+SET @MaxProductSalesId= @MaxProductSalesId + 1
+INSERT INTO tblProductSales VALUES (@MaxProductSalesId, @ProductId, @QuantityToSell);
+COMMIT TRAN
+END TRY
+BEGIN CATCH
+ROLLBACK TRAN
+END CATCH
+END
+END
+
+spSellProduct 1,10
