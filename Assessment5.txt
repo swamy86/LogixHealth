@@ -1,0 +1,226 @@
+--Create employee table
+CREATE TABLE EMPLOYEE(
+empno INT,
+ename VARCHAR(30),
+job VARCHAR(30),
+manager INT,
+hiredate DATE,
+salary INT,
+commission INT,
+deptno INT
+);
+
+--Insert records
+INSERT INTO EMPLOYEE VALUES
+(8369,'Smith','CLERK',8902,'1990-12-18',800,null,20),
+(8499,'Anya','SALESMAN',8698,'1991-02-20',1600,300,30),
+(8521,'Seth','SALESMAN',8698,'1991-02-22',1250,500,30),
+(8566,'Mahadevan','MANAGER',8839,'1991-04-02',2985,null,20),
+(8654,'Momin','SALESMAN',8698,'1991-09-28',1250,1400,30),
+(8698,'Bina','MANAGER',8839,'1991-05-01',2850,null,30),
+(8882,'Shiavnsh','MANAGER',8839,'1991-06-09',2450,null,10),
+(8888,'Scott','ANALYST',8566,'1992-12-09',3000,null,20),
+(8839,'Amir','PRESIDENT',null,'1991-11-18',5000,null,10),
+(8844,'Kuldeep','SALESMAN',8698,'1991-09-08',1500,0,30),
+(8886,'Anoop','CLERK',8888,'1993-01-12',1100,null,20),
+(8100,'Yash','ANALYST',null,'2003-05-03',6000,null,20),
+(8900,'Jatin','CLERK',8698,'1991-12-03',950,null,30),
+(8902,'Fakir','ANALYST',8566,'1991-12-03',3500,null,20);
+
+
+--1. Display details of all the employees from Employee table.
+ALTER FUNCTION fn_GetEmployeeDetails()
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),job VARCHAR(30),manager INT,hiredate DATE,salary int,commission INT,deptno int)
+AS
+BEGIN
+   INSERT INTO @employeeTable
+   SELECT * FROM EMPLOYEE
+   RETURN
+END 
+SELECT * FROM fn_GetEmployeeDetails();
+																	
+--2. Add a new record to Employee table.8088, 'Ramesh', 'CLERK', 8789, '2022-08-09', 4500.00, NULL, 10
+CREATE FUNCTION fn_AddRecordsToEmployee()
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),job VARCHAR(30),manager INT,hiredate DATE,salary int,commission INT,deptno int)
+AS
+BEGIN
+INSERT INTO @employeeTable
+SELECT * FROM EMPLOYEE
+
+INSERT INTO @employeeTable VALUES(8088, 'Ramesh', 'CLERK', 8789, '2022-08-09', 4500.00, NULL, 10)
+RETURN
+END 
+SELECT * FROM fn_AddRecordsToEmployee();
+
+																		
+--3. Count the number of records in Employee table.
+CREATE FUNCTION fn_TotalEmployeeCount()
+RETURNS INTEGER
+AS
+BEGIN
+RETURN(SELECT COUNT(*) FROM EMPLOYEE)
+END
+PRINT dbo.fn_TotalEmployeeCount()
+
+																		
+--4. Search the details of those employees who work in deptno 30.
+ALTER FUNCTION fn_GetEmployeeDetailDeptno(@DeptId INT)
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),job VARCHAR(30),manager INT,hiredate DATE,salary int,commission INT,deptno int)
+AS
+BEGIN
+   INSERT INTO @employeeTable
+   SELECT * FROM EMPLOYEE WHERE deptno=@DeptId
+   RETURN
+END 
+SELECT * FROM fn_GetEmployeeDetailDeptno(30);
+																		
+--5. Sort the records in Employee table.
+alter FUNCTION fn_SortEmployeeBySalary()
+RETURNS @employeeTable TABLE 
+(eno int, employeeName varchar(50),job VARCHAR(30),manager INT,hiredate DATE,salary int,commission INT,deptno int)
+AS
+BEGIN
+INSERT INTO @employeeTable
+SELECT * FROM EMPLOYEE
+RETURN
+END 
+SELECT * FROM fn_SortEmployeeBySalary() ORDER BY SALARY;
+
+
+--6. Update the salary of the last inserted record to 500.
+ALTER FUNCTION fn_updateEmployeeSalary()
+returns @employeetable table(empno int,ename varchar(40),job varchar(45),manager int,hiredate date,salary int,commission int,deptno int )
+AS
+BEGIN
+insert into @employeetable 
+select * from EMPLOYEE;
+update @employeetable set SALARY=500 WHERE empno=(SELECT MAX(EMPNO) FROM @employeetable);
+return
+end;
+
+select * from fn_updateEmployeeSalary();
+																		
+--7. Delete the last inserted record.
+CREATE FUNCTION fn_DeleteLastEmployeeRecord()
+returns @employeetable table(empno int,ename varchar(40),job varchar(45),manager int,hiredate date,salary int,commission int,deptno int )
+AS
+BEGIN
+insert into @employeetable 
+select * from EMPLOYEE;
+DELETE FROM @employeetable WHERE empno=(SELECT MAX(EMPNO) FROM @employeetable);
+return
+end;
+select * from fn_DeleteLastEmployeeRecord();
+
+
+
+CREATE TABLE PRODUCTS(
+product_code VARCHAR(20) PRIMARY KEY,
+product_name VARCHAR(20),
+price INT,
+quantity_remaining  INT,
+quantity_sold  INT
+);
+INSERT INTO PRODUCTS VALUES
+('P1','Iphone 13 pro max',1200,5,195),
+('P2','Airpod pro',279,10,90),
+('P3','Macbook pro 16',5000,2,48),
+('P4','Ipad air',650,1,9);
+
+CREATE TABLE SALES(
+order_id INT PRIMARY KEY,
+order_date DATE,
+product_code VARCHAR(20) FOREIGN KEY REFERENCES PRODUCTS(product_code),
+quantity_ordered  INT,
+sale_price  INT
+);
+INSERT INTO SALES VALUES
+(1,'2022-01-10','P1',100,120000),
+(2,'2022-01-20','P1',50,60000),
+(3,'2022-02-05','P1',45,540000),
+(4,'2022-01-15','P2',50,13950),
+(5,'2022-03-25','P2',40,11160),
+(6,'2022-02-25','P3',10,50000),
+(7,'2022-03-15','P3',10,50000),
+(8,'2022-03-25','P3',20,100000),
+(9,'2022-04-21','P3',8,40000),
+(10,'2022-04-27','P4',9,5850);
+SELECT * FROM PRODUCTS;
+SELECT * FROM SALES;
+
+
+--Create a Procedure for the following scenarios:
+--1. For each iPhone 13 Pro Max Sale, modify the database tables accordingly. Assume that only one piece of iPhone 13 Pro Max could be sold at a time.
+CREATE PROCEDURE sp_sellOneiPhone 
+AS
+BEGIN
+DECLARE @product_code VARCHAR(20)
+SET @product_code = 'P1'
+DECLARE @quantity_remaining INT
+DECLARE @quantity_sold INT
+SELECT @quantity_remaining = quantity_remaining, @quantity_sold = quantity_sold
+FROM PRODUCTS WHERE product_code = @product_code
+IF (@quantity_remaining < 1)
+BEGIN
+DECLARE @error_message VARCHAR(100)
+SET @error_message = 'Insufficient quantity available for sale'
+RAISERROR(@error_message, 16, 1)
+END
+ELSE
+BEGIN
+UPDATE PRODUCTS SET quantity_remaining = @quantity_remaining - 1,
+quantity_sold = @quantity_sold + 1 WHERE product_code = @product_code
+
+DECLARE @order_id INT
+SELECT @order_id = MAX(order_id) + 1 FROM SALES;
+
+INSERT INTO SALES (order_id,order_date, product_code, quantity_ordered, sale_price)
+VALUES (@order_id,GETDATE(), @product_code, 1, (SELECT price FROM PRODUCTS WHERE product_code = @product_code))
+END
+END
+
+
+EXEC sp_sellOneiPhone
+SELECT * FROM PRODUCTS;
+SELECT * FROM SALES;
+
+
+--2.For every given product and the quantity, check if the product is available based on the required quantity. If available then modify the database tables accordingly.
+
+ALTER PROCEDURE sell_product 
+@product_code VARCHAR(20),
+@quantity_ordered INT
+AS
+BEGIN
+DECLARE @quantity_remaining INT
+DECLARE @quantity_sold INT
+DECLARE @product_price INT
+    
+SELECT @quantity_remaining = quantity_remaining, @quantity_sold = quantity_sold,
+@product_price = price FROM PRODUCTS WHERE product_code = @product_code
+IF (@quantity_remaining < @quantity_ordered)
+BEGIN
+DECLARE @error_message VARCHAR(100)
+SET @error_message = 'Insufficient quantity available for sale'
+RAISERROR(@error_message, 16, 1)
+END
+ELSE
+BEGIN
+UPDATE PRODUCTS SET quantity_remaining = @quantity_remaining - @quantity_ordered,
+quantity_sold = @quantity_sold + @quantity_ordered WHERE product_code = @product_code
+        
+DECLARE @order_id INT
+SELECT @order_id = MAX(order_id) + 1 FROM SALES
+
+INSERT INTO SALES (order_id, order_date, product_code, quantity_ordered, sale_price)
+VALUES (@order_id, GETDATE(), @product_code, @quantity_ordered, @product_price * @quantity_ordered)
+END
+END
+
+EXEC sell_product 'P2', 5
+SELECT * FROM PRODUCTS;
+SELECT * FROM SALES;
+
