@@ -1,0 +1,90 @@
+CREATE TABLE tblProduct(
+ProductId Int Primary Key,
+Name Varchar(10),
+UnitPrice INT,
+QtyAvailable Int
+)
+INSERT INTO tblProduct VALUES(1,'Laptops',40000,50),
+(2,'Desktops',1000,50),
+(3,'Mobiles',15000,50),
+(4,'Ipad',40000,25);
+SELECT * FROM tblProduct;
+
+CREATE TABLE tbl_Product_Audit(Id INT IDENTITY, AuditData TEXT);
+SELECT * FROM tbl_Product_Audit;
+
+--Insert Trigger
+CREATE TRIGGER tr_tblProduct_ForInsert
+ON tblProduct
+FOR INSERT
+AS
+BEGIN
+DECLARE @Id INT
+SELECT @Id=ProductId FROM inserted
+INSERT INTO tbl_Product_Audit VALUES(' New Product with Id= '+CAST(@ID AS VARCHAR)+' is added at '+CAST(GETDATE() AS VARCHAR))
+END
+INSERT INTO tblProduct VALUES(5,'Keyboards',2000,50);
+SELECT * FROM tblProduct;
+SELECT * FROM tbl_Product_Audit;
+
+
+--Delete Trigger
+ALTER TRIGGER tr_tblProduct_ForDelete
+ON tblProduct
+FOR DELETE
+AS
+BEGIN
+DECLARE @Id INT
+SELECT @Id=ProductId FROM deleted
+INSERT INTO tbl_Product_Audit VALUES(' An Existing Product with Id= '+CAST(@ID AS VARCHAR)+' is deleted at '+CAST(GETDATE() AS VARCHAR))
+END
+DELETE FROM tblProduct WHERE ProductId=5;
+SELECT * FROM tblProduct;
+SELECT * FROM tbl_Product_Audit;
+
+
+
+--UPDATE Trigger
+CREATE TRIGGER tr_tbl_Product_ForUpdate
+ON tblProduct
+FOR UPDATE
+AS
+BEGIN
+DECLARE @ProductId INT
+DECLARE @OldProductName VARCHAR (30), @NewProductName VARCHAR(30)
+DECLARE @OldUnitPrice INT, @NewUnitPrice INT
+DECLARE @OldQtyAvailable INT, @NewQtyAvailable INT
+
+DECLARE @AuditText VARCHAR(1000);
+
+SELECT * INTO #TempTable FROM inserted
+
+WHILE(EXISTS(SELECT ProductId FROM #TempTable))
+BEGIN
+SET @AuditText=''
+
+SELECT TOP 1 @ProductId=ProductId,@NewProductName=Name,@NewUnitPrice=UnitPrice,@NewQtyAvailable=QtyAvailable FROM #TempTable
+SELECT @OldProductName=Name,@OldUnitPrice=UnitPrice,@OldQtyAvailable=QtyAvailable FROM deleted WHERE ProductId=@ProductId
+
+SET @AuditText = 'product  with productid=' +  CAST (@ProductId AS VARCHAR)+' Changed'
+
+if(@OldProductName<> @NewProductName)
+SET @AuditText = @AuditText+ 'productname from'+@OldProductName+ 'to'+ @NewProductName
+
+if(@OldUnitPrice<> @NewUnitPrice)
+SET @AuditText = @AuditText+ 'unitprice from'+CAST(@OldUnitPrice AS VARCHAR)+ 'to'+ CAST(@NewUnitPrice AS VARCHAR)
+
+if(@OldQtyAvailable<> @NewQtyAvailable)
+SET @AuditText = @AuditText+ 'unitprice from'+CAST(@OldQtyAvailable AS VARCHAR)+ 'to'+ CAST(@NewQtyAvailable AS VARCHAR)
+
+
+INSERT INTO tbl_Product_Audit VALUES (@AuditText)
+DELETE FROM #TempTable WHERE ProductId=@ProductId
+END
+END
+
+UPDATE tblProduct
+SET QtyAvailable=40 WHERE ProductiD=3
+
+SELECT * FROM tblProduct;
+SELECT * FROM tbl_Product_Audit;
