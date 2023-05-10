@@ -1,0 +1,60 @@
+CREATE TABLE tblProduct(
+ProductId Int PRIMARY KEY,
+Name Varchar(10),
+UnitPrice INT
+)
+INSERT INTO tblProduct VALUES
+(1,'Laptops',40000),
+(2,'Desktops',1000),
+(3,'Mobiles',15000),
+(4,'Ipad',40000),
+(5,'Desktops',1000);
+SELECT * FROM tblProduct
+
+BEGIN TRAN
+DELETE FROM tblProduct 
+WHERE ProductId NOT IN (SELECT MIN(ProductId) FROM tblProduct
+GROUP BY Name, UnitPrice);
+ROLLBACK
+
+BEGIN TRAN
+DELETE FROM tblProduct
+WHERE ProductId NOT IN(SELECT MAX(ProductId) FROM tblProduct 
+GROUP by Name, UnitPrice)
+ROLLBACK
+
+--window function
+BEGIN TRAN
+DELETE FROM tblProduct
+WHERE ProductId IN (SELECT ProductId FROM(
+SELECT *,ROW_NUMBER() OVER(PARTITION BY Name,UnitPrice ORDER BY ProductId) AS RowNumber FROM tblProduct) AS q
+WHERE q.RowNumber>1);
+ROLLBACK
+
+
+
+CREATE TABLE tblProduct2(
+ProductId Int,
+Name Varchar(10),
+UnitPrice INT
+)
+INSERT INTO tblProduct2 VALUES
+(1,'Laptops',40000),
+(2,'Desktops',1000),
+(2,'Desktops',1000);
+SELECT * FROM tblProduct2
+
+DROP TABLE tblProduct2
+
+ALTER TABLE tblProduct2
+ADD RowNumber INT IDENTITY;
+
+BEGIN TRAN
+DELETE FROM tblProduct2
+WHERE RowNumber NOT IN(
+SELECT MIN(RowNumber) FROM tblProduct2
+GROUP BY Name,UnitPrice)
+
+ROLLBACK
+
+
