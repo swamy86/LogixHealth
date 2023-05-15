@@ -1,14 +1,14 @@
 --Online Movie Booking System
 -- Users table
-CREATE TABLE tbl_users (
+CREATE TABLE tbl_Users (
     user_id VARCHAR(10) PRIMARY KEY,
     Name VARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(50) NOT NULL UNIQUE,
     phoneNumber VARCHAR(10) NOT NULL UNIQUE,
     created_at DATETIME DEFAULT GETDATE()
 );
 
-INSERT INTO tbl_users (user_Id, Name, email, phoneNumber) VALUES 
+INSERT INTO tbl_Users (user_Id, Name, email, phoneNumber) VALUES 
   ('U1', 'johnsmith', 'johnsmith@example.com', '9876457888'),
   ('U2', 'janesmith', 'janesmith@example.com', '9886457898'),
   ('U3', 'alex', 'alex@example.com', '9876447808'),
@@ -21,13 +21,13 @@ INSERT INTO tbl_users (user_Id, Name, email, phoneNumber) VALUES
   ('U10', 'dianaprince', 'diana@example.com', '9876457800');
 
 -- Theatres table
-CREATE TABLE tbl_theatres (
+CREATE TABLE tbl_Theatres (
     theatre_id VARCHAR(10) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(50) NOT NULL,
     address VARCHAR(200) NOT NULL
 );
 
-INSERT INTO tbl_theatres (theatre_id, name, address)
+INSERT INTO tbl_Theatres (theatre_id, name, address)
 VALUES 
   ('T1', 'PVR Cinemas', 'kormangala,Banglore'),
   ('T2', 'PVP', 'Mallathahalli,Banglore'),
@@ -36,14 +36,14 @@ VALUES
   ('T5', 'Metro Inox Cinemas', 'Koramangala,Banglore');
 
 -- Movies table
-CREATE TABLE tbl_movies (
+CREATE TABLE tbl_Movies (
     movie_id VARCHAR(10) PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
-    description TEXT,
+    description VARCHAR(MAX),
     duration INT,
     release_date DATE
 );
-INSERT INTO tbl_movies (movie_id, title, description, duration, release_date)
+INSERT INTO tbl_Movies (movie_id, title, description, duration, release_date)
 VALUES
 ('M1', 'Avengers: Endgame', 'The Avengers must undo Thanos'' actions and restore order to the universe', 182, '2023-04-26'),
 ('M2', 'The Dark Knight', 'Batman fights the Joker in a battle for Gotham City', 152, '2023-04-25'),
@@ -52,14 +52,14 @@ VALUES
 ('M5', 'Titanic', 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic', 194, '2023-05-01');
 
 -- Screens table
-CREATE TABLE tbl_screens (
+CREATE TABLE tbl_Screens (
     screen_id VARCHAR(10) PRIMARY KEY,
     theatre_id VARCHAR(10) NOT NULL,
-    name VARCHAR(50) NOT NULL,
+    name VARCHAR(30) NOT NULL,
     capacity INT NOT NULL,
-    FOREIGN KEY (theatre_id) REFERENCES tbl_theatres(theatre_id)
+    FOREIGN KEY (theatre_id) REFERENCES tbl_Theatres(theatre_id)
 );
-INSERT INTO tbl_screens (screen_id, theatre_id, name, capacity)
+INSERT INTO tbl_Screens (screen_id, theatre_id, name, capacity)
 VALUES
 ('sc1', 't1', 'Screen 1', 80),
 ('sc2','t1', 'Screen 2', 80),
@@ -72,7 +72,7 @@ VALUES
 
 
 -- Shows table
-CREATE TABLE tbl_shows (
+CREATE TABLE tbl_Shows (
     show_id VARCHAR(10) PRIMARY KEY,
     movie_id VARCHAR(10) NOT NULL,
     screen_id VARCHAR(10) NOT NULL,
@@ -80,12 +80,12 @@ CREATE TABLE tbl_shows (
 	show_time DATETIME NOT NULL,
     price INT NOT NULL,
     available_seats INT NOT NULL,
-    FOREIGN KEY (movie_id) REFERENCES tbl_movies(movie_id),
-    FOREIGN KEY (screen_id) REFERENCES tbl_screens(screen_id),
-	FOREIGN KEY (theatre_id) REFERENCES tbl_theatres(theatre_id)
+    FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
+    FOREIGN KEY (screen_id) REFERENCES tbl_Screens(screen_id),
+	FOREIGN KEY (theatre_id) REFERENCES tbl_Theatres(theatre_id)
 );
 
-INSERT INTO tbl_shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
+INSERT INTO tbl_Shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
 VALUES
 ('sh1', 'm1', 'sc1', 't1', '2023-05-13 18:00:00', 200, 80),
 ('sh2', 'm2', 'sc2', 't1', '2023-05-13 20:30:00', 200, 80),
@@ -96,12 +96,12 @@ VALUES
 ('sh7', 'm2', 'sc7', 't3', '2023-05-13 09:30:00', 200, 100),
 ('sh8', 'm1', 'sc8', 't4', '2023-05-13 18:00:00', 200, 100);
 
-INSERT INTO tbl_shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
+INSERT INTO tbl_Shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
 VALUES
 ('sh6', 'm1', 'sc6', 't2', '2023-05-13 09:30:00', 200, 100);
 
 -- Bookings table
-CREATE TABLE tbl_bookings (
+CREATE TABLE tbl_Bookings (
     booking_id VARCHAR(10) PRIMARY KEY,
     user_id VARCHAR(10) NOT NULL,
     show_id VARCHAR(10) NOT NULL,
@@ -109,12 +109,12 @@ CREATE TABLE tbl_bookings (
     total_price INT NOT NULL,
 	payment_status VARCHAR(10),
     booking_time DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (user_id) REFERENCES tbl_users(user_id),
-    FOREIGN KEY (show_id) REFERENCES tbl_shows(show_id)
+    FOREIGN KEY (user_id) REFERENCES tbl_Users(user_id),
+    FOREIGN KEY (show_id) REFERENCES tbl_Shows(show_id)
 );
 
 -- Inserting records into tbl_bookings
-INSERT INTO tbl_bookings(booking_id,user_id, show_id, total_tickets, total_price,payment_status)
+INSERT INTO tbl_Bookings(booking_id,user_id, show_id, total_tickets, total_price,payment_status)
 VALUES
 ('b1', 'u1', 'sh1',5, 1000,'success'),
 ('b2', 'u2', 'sh2',5, 1000,'success'),
@@ -130,7 +130,7 @@ CREATE Table tbl_Ticket(
 Ticket_ID varchar(20) PRIMARY KEY,
 Booking_ID varchar(10),
 Price int NOT NULL,
-Foreign Key(Booking_ID) REFERENCES tbl_bookings(Booking_ID)
+Foreign Key(Booking_ID) REFERENCES tbl_Bookings(Booking_ID)
 );
 INSERT INTO tbl_Ticket VALUES
 ('tk1','b1',200),
@@ -158,18 +158,18 @@ INSERT INTO tbl_Ticket VALUES
 
 
 -- Reviews table
-CREATE TABLE tbl_reviews (
+CREATE TABLE tbl_Reviews (
     review_id VARCHAR(10) PRIMARY KEY,
 	movie_id VARCHAR(10) NOT NULL,
     user_id VARCHAR(10) NOT NULL,
     rating INT NOT NULL,
-	comment TEXT,
-    FOREIGN KEY (user_id) REFERENCES tbl_users(user_Id),
-    FOREIGN KEY (movie_id) REFERENCES tbl_movies(movie_id),
+	comment VARCHAR(MAX),
+    FOREIGN KEY (user_id) REFERENCES tbl_Users(user_Id),
+    FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
 	CONSTRAINT review_info UNIQUE(user_id,movie_id)
 );
 
-INSERT INTO tbl_reviews (review_id,movie_id, user_id, rating, comment)
+INSERT INTO tbl_Reviews (review_id,movie_id, user_id, rating, comment)
 VALUES
 ('r1','m1', 'u1', 4, 'Great movie! The action scenes were amazing.'),
 ('r2','m1', 'u2', 5, 'This is one of the best movies I have ever seen.'),
@@ -189,7 +189,7 @@ SELECT * FROM tbl_Movies_Audit;
 
 --Triggers
 --Insert Trigger
-ALTER TRIGGER tr_tblMovies_ForInsert
+ALTER TRIGGER tr_tbl_Movies_ForInsert
 ON tbl_movies
 FOR INSERT
 AS
@@ -205,7 +205,7 @@ SELECT * FROM tbl_movies;
 SELECT * FROM tbl_Movies_Audit;
 
 --Delete Trigger
-CREATE TRIGGER tr_tblMovies_ForDelete
+CREATE TRIGGER tr_tbl_Movies_ForDelete
 ON tbl_movies
 FOR DELETE
 AS
@@ -224,7 +224,7 @@ CREATE TABLE tbl_users_Audit(Id INT IDENTITY, AuditData TEXT);
 SELECT * FROM tbl_users_Audit;
 
 --Insert Trigger
-ALTER TRIGGER tr_tblUsers_ForInsert
+ALTER TRIGGER tr_tbl_Users_ForInsert
 ON tbl_users
 FOR INSERT
 AS
@@ -238,7 +238,7 @@ SELECT * FROM tbl_users;
 SELECT * FROM tbl_users_Audit;
 
 --Delete Trigger
-CREATE TRIGGER tr_tblUsers_ForDelete
+CREATE TRIGGER tr_tbl_Users_ForDelete
 ON tbl_users
 FOR DELETE
 AS
@@ -307,7 +307,7 @@ EXEC spGetMovieNamesWithTheatreInfo;
 
 
 --STORED PROC 2
-CREATE PROCEDURE get_show_info_by_movie_name_with_theatre_info
+CREATE PROCEDURE spGetShowInfoByMovieNameWithTheatreInfo
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -317,12 +317,12 @@ BEGIN
     INNER JOIN tbl_theatres ON tbl_shows.theatre_id = tbl_theatres.theatre_id
     WHERE tbl_movies.title = @movie_name
 END
-EXEC get_show_info_by_movie_name_with_theatre_info 'The Dark Knight';
+EXEC spGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
 
 
 
 --Stored proc 3
-CREATE PROCEDURE get_shows_with_theatre_info
+CREATE PROCEDURE spGetShowsWithTheatreInfo
 AS
 BEGIN
     SELECT s.show_id, m.title AS movie_name, t.name AS theatre_name, t.address AS theatre_location, s.show_time
@@ -330,11 +330,11 @@ BEGIN
     INNER JOIN tbl_movies m ON s.movie_id = m.movie_id
     INNER JOIN tbl_theatres t ON s.theatre_id = t.theatre_id
 END
-EXEC get_shows_with_theatre_info
+EXEC spGetShowsWithTheatreInfo
 
 
 --STORED PROC 4
-ALTER PROCEDURE get_average_review_by_movie_name
+ALTER PROCEDURE spGetAverageReviewByMovieName
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -343,11 +343,11 @@ BEGIN
     INNER JOIN tbl_movies m ON r.movie_id = m.movie_id
     WHERE m.title = @movie_name;
 END
-EXEC get_average_review_by_movie_name 'Avengers: Endgame';
+EXEC spGetAverageReviewByMovieName 'Avengers: Endgame';
 
 
 --STORED PROC 5
-CREATE PROCEDURE check_and_book_tickets
+CREATE PROCEDURE spCheckAndBookTickets
     @user_id VARCHAR(10),
     @show_id VARCHAR(10),
     @total_tickets INT
@@ -408,7 +408,6 @@ BEGIN
 END
 
 
-EXEC check_and_book_tickets 'u7', 'sh4', 5
+EXEC spCheckAndBookTickets 'u7', 'sh4', 5
 SELECT * FROM tbl_bookings
 SELECT * FROM tbl_ticket
-
