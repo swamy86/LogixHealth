@@ -295,7 +295,7 @@ UPDATE tbl_users SET Name='JANE',phoneNumber='9899329123'  WHERE user_id='U11';
 
 
 --STORED PROC 1
-ALTER PROCEDURE spGetMovieNamesWithTheatreInfo
+ALTER PROCEDURE uspGetMovieNamesWithTheatreInfo
 AS  
 BEGIN  
     SELECT m.title, t.name AS theatre_name, t.address AS theatre_address
@@ -307,7 +307,7 @@ EXEC spGetMovieNamesWithTheatreInfo;
 
 
 --STORED PROC 2
-CREATE PROCEDURE spGetShowInfoByMovieNameWithTheatreInfo
+CREATE PROCEDURE uspGetShowInfoByMovieNameWithTheatreInfo
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -322,7 +322,7 @@ EXEC spGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
 
 
 --Stored proc 3
-CREATE PROCEDURE spGetShowsWithTheatreInfo
+CREATE PROCEDURE uspGetShowsWithTheatreInfo
 AS
 BEGIN
     SELECT s.show_id, m.title AS movie_name, t.name AS theatre_name, t.address AS theatre_location, s.show_time
@@ -334,7 +334,7 @@ EXEC spGetShowsWithTheatreInfo
 
 
 --STORED PROC 4
-ALTER PROCEDURE spGetAverageReviewByMovieName
+ALTER PROCEDURE uspGetAverageReviewByMovieName
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -347,7 +347,7 @@ EXEC spGetAverageReviewByMovieName 'Avengers: Endgame';
 
 
 --STORED PROC 5
-CREATE PROCEDURE spCheckAndBookTickets
+CREATE PROCEDURE uspCheckAndBookTickets
     @user_id VARCHAR(10),
     @show_id VARCHAR(10),
     @total_tickets INT
