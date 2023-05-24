@@ -2,13 +2,12 @@
 -- Users table
 CREATE TABLE tbl_Users (
     user_id VARCHAR(10) PRIMARY KEY,
-    Name VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL UNIQUE,
-    phoneNumber VARCHAR(10) NOT NULL UNIQUE,
+    name VARCHAR(30) NOT NULL,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    phone_number CHAR(10) NOT NULL UNIQUE CHECK (phone_number LIKE '[6789]%' AND LEN(phone_number) = 10),
     created_at DATETIME DEFAULT GETDATE()
 );
-
-INSERT INTO tbl_Users (user_Id, Name, email, phoneNumber) VALUES 
+INSERT INTO tbl_Users (user_Id, name, email, phone_number) VALUES 
   ('U1', 'johnsmith', 'johnsmith@example.com', '9876457888'),
   ('U2', 'janesmith', 'janesmith@example.com', '9886457898'),
   ('U3', 'alex', 'alex@example.com', '9876447808'),
@@ -20,14 +19,14 @@ INSERT INTO tbl_Users (user_Id, Name, email, phoneNumber) VALUES
   ('U9', 'clarkkent', 'clarkkent@example.com', '9870057898'),
   ('U10', 'dianaprince', 'diana@example.com', '9876457800');
 
+
 -- Theatres table
 CREATE TABLE tbl_Theatres (
     theatre_id VARCHAR(10) PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    address VARCHAR(200) NOT NULL
+    theatre_name VARCHAR(30) NOT NULL,
+    theatre_address VARCHAR(200) NOT NULL
 );
-
-INSERT INTO tbl_Theatres (theatre_id, name, address)
+INSERT INTO tbl_Theatres (theatre_id, theatre_name, theatre_address)
 VALUES 
   ('T1', 'PVR Cinemas', 'kormangala,Banglore'),
   ('T2', 'PVP', 'Mallathahalli,Banglore'),
@@ -35,13 +34,14 @@ VALUES
   ('T4', 'Cinepollis', 'Koramangala,Banglore'),
   ('T5', 'Metro Inox Cinemas', 'Koramangala,Banglore');
 
+
 -- Movies table
 CREATE TABLE tbl_Movies (
     movie_id VARCHAR(10) PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
-    description VARCHAR(MAX),
-    duration INT,
-    release_date DATE
+    description VARCHAR(1000) NOT NULL,
+    duration TINYINT NOT NULL,
+    release_date DATE NOT NULL
 );
 INSERT INTO tbl_Movies (movie_id, title, description, duration, release_date)
 VALUES
@@ -51,15 +51,16 @@ VALUES
 ('M4', 'Inception', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.', 148, '2023-05-05'),
 ('M5', 'Titanic', 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic', 194, '2023-05-01');
 
+
 -- Screens table
 CREATE TABLE tbl_Screens (
     screen_id VARCHAR(10) PRIMARY KEY,
     theatre_id VARCHAR(10) NOT NULL,
-    name VARCHAR(30) NOT NULL,
-    capacity INT NOT NULL,
+    screen_name VARCHAR(30) NOT NULL,
+    capacity SMALLINT NOT NULL,
     FOREIGN KEY (theatre_id) REFERENCES tbl_Theatres(theatre_id)
 );
-INSERT INTO tbl_Screens (screen_id, theatre_id, name, capacity)
+INSERT INTO tbl_Screens (screen_id, theatre_id, screen_name, capacity)
 VALUES
 ('sc1', 't1', 'Screen 1', 80),
 ('sc2','t1', 'Screen 2', 80),
@@ -78,13 +79,12 @@ CREATE TABLE tbl_Shows (
     screen_id VARCHAR(10) NOT NULL,
 	theatre_id VARCHAR(10) NOT NULL,
 	show_time DATETIME NOT NULL,
-    price INT NOT NULL,
-    available_seats INT NOT NULL,
+    price SMALLINT NOT NULL,
+    available_seats SMALLINT NOT NULL,
     FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
     FOREIGN KEY (screen_id) REFERENCES tbl_Screens(screen_id),
 	FOREIGN KEY (theatre_id) REFERENCES tbl_Theatres(theatre_id)
 );
-
 INSERT INTO tbl_Shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
 VALUES
 ('sh1', 'm1', 'sc1', 't1', '2023-05-13 18:00:00', 200, 80),
@@ -96,23 +96,19 @@ VALUES
 ('sh7', 'm2', 'sc7', 't3', '2023-05-13 09:30:00', 200, 100),
 ('sh8', 'm1', 'sc8', 't4', '2023-05-13 18:00:00', 200, 100);
 
-INSERT INTO tbl_Shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
-VALUES
-('sh6', 'm1', 'sc6', 't2', '2023-05-13 09:30:00', 200, 100);
 
 -- Bookings table
 CREATE TABLE tbl_Bookings (
     booking_id VARCHAR(10) PRIMARY KEY,
     user_id VARCHAR(10) NOT NULL,
     show_id VARCHAR(10) NOT NULL,
-    total_tickets INT NOT NULL,
-    total_price INT NOT NULL,
-	payment_status VARCHAR(10),
+    payment_status VARCHAR(10),
+    total_tickets TINYINT NOT NULL CHECK (total_tickets >= 0 AND total_tickets <= 10),
+    total_price SMALLINT NOT NULL,
     booking_time DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (user_id) REFERENCES tbl_Users(user_id),
     FOREIGN KEY (show_id) REFERENCES tbl_Shows(show_id)
 );
-
 -- Inserting records into tbl_bookings
 INSERT INTO tbl_Bookings(booking_id,user_id, show_id, total_tickets, total_price,payment_status)
 VALUES
@@ -125,11 +121,10 @@ VALUES
 ('b7', 'u8', 'sh3',2, 400,'success');
 
 
-
 CREATE Table tbl_Ticket(
-Ticket_ID varchar(20) PRIMARY KEY,
+Ticket_ID varchar(10) PRIMARY KEY,
 Booking_ID varchar(10),
-Price int NOT NULL,
+Price SMALLINT NOT NULL,
 Foreign Key(Booking_ID) REFERENCES tbl_Bookings(Booking_ID)
 );
 INSERT INTO tbl_Ticket VALUES
@@ -160,15 +155,14 @@ INSERT INTO tbl_Ticket VALUES
 -- Reviews table
 CREATE TABLE tbl_Reviews (
     review_id VARCHAR(10) PRIMARY KEY,
-	movie_id VARCHAR(10) NOT NULL,
+    movie_id VARCHAR(10) NOT NULL,
     user_id VARCHAR(10) NOT NULL,
-    rating INT NOT NULL,
-	comment VARCHAR(MAX),
+    rating TINYINT NOT NULL,
+    comment VARCHAR(1000),
     FOREIGN KEY (user_id) REFERENCES tbl_Users(user_Id),
     FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
-	CONSTRAINT review_info UNIQUE(user_id,movie_id)
+    CONSTRAINT review_info UNIQUE(user_id,movie_id)
 );
-
 INSERT INTO tbl_Reviews (review_id,movie_id, user_id, rating, comment)
 VALUES
 ('r1','m1', 'u1', 4, 'Great movie! The action scenes were amazing.'),
@@ -184,12 +178,12 @@ VALUES
 
 
 --Audit table for movies
-CREATE TABLE tbl_Movies_Audit(Id INT IDENTITY, AuditData TEXT);
+CREATE TABLE tbl_Movies_Audit(Id INT IDENTITY, AuditData VARCHAR(1000));
 SELECT * FROM tbl_Movies_Audit;
 
 --Triggers
 --Insert Trigger
-ALTER TRIGGER tr_tbl_Movies_ForInsert
+CREATE TRIGGER tr_tbl_Movies_ForInsert
 ON tbl_movies
 FOR INSERT
 AS
@@ -198,7 +192,6 @@ DECLARE @Id VARCHAR(10)
 SELECT @Id=movie_Id FROM inserted
 INSERT INTO tbl_Movies_Audit VALUES(' New movie with Id= '+@ID+' is added at '+CAST(GETDATE() AS VARCHAR))
 END
-
 
 INSERT INTO tbl_movies (movie_id, title, description, duration, release_date) VALUES ('M6', 'Forrest Gump', 'The presidencies of Kennedy and Johnson, the events of Vietnam, Watergate, and other historical events unfold through the perspective of an Alabama man with an IQ of 75.', 142, '2023-04-20');
 SELECT * FROM tbl_movies;
@@ -220,11 +213,12 @@ SELECT * FROM tbl_movies;
 SELECT * FROM tbl_Movies_Audit;
 
 
-CREATE TABLE tbl_users_Audit(Id INT IDENTITY, AuditData TEXT);
+
+CREATE TABLE tbl_users_Audit(Id INT IDENTITY, AuditData VARCHAR(1000));
 SELECT * FROM tbl_users_Audit;
 
 --Insert Trigger
-ALTER TRIGGER tr_tbl_Users_ForInsert
+CREATE TRIGGER tr_tbl_Users_ForInsert
 ON tbl_users
 FOR INSERT
 AS
@@ -233,7 +227,9 @@ DECLARE @Id varchar(10)
 SELECT @Id=User_Id FROM inserted
 INSERT INTO tbl_users_Audit VALUES(' New User with Id= '+CAST(@ID AS VARCHAR)+' is added at '+CAST(GETDATE() AS VARCHAR))
 END
-INSERT INTO tbl_users (user_Id, Name, email, phoneNumber) VALUES ('U11', 'alex', 'alexd@example.com', '8876400800');
+
+
+INSERT INTO tbl_users (user_Id, Name, email, phone_number) VALUES ('U11', 'alex', 'alexd@example.com', '8876400800');
 SELECT * FROM tbl_users;
 SELECT * FROM tbl_users_Audit;
 
@@ -247,9 +243,9 @@ DECLARE @Id VARCHAR(10)
 SELECT @Id=User_Id FROM deleted
 INSERT INTO tbl_users_Audit VALUES(' An Existing user with Id= '+CAST(@ID AS VARCHAR)+' is deleted at '+CAST(GETDATE() AS VARCHAR))
 END
+
 DELETE FROM tbl_users WHERE USER_ID='U11';
 SELECT * FROM tbl_users_Audit;
-
 
 
 --UPDATE Trigger
@@ -271,8 +267,8 @@ WHILE(EXISTS(SELECT @userId FROM #TempTable))
 BEGIN
 SET @AuditText=''
 
-SELECT TOP 1 @userId=user_Id,@NewName=name,@NewEmail=email,@NewphoneNumber=phoneNumber FROM #TempTable
-SELECT @OldName=name,@OldEmail=email,@OldphoneNumber=phoneNumber FROM deleted WHERE user_Id=@userId
+SELECT TOP 1 @userId=user_Id,@NewName=name,@NewEmail=email,@NewphoneNumber=phone_number FROM #TempTable
+SELECT @OldName=name,@OldEmail=email,@OldphoneNumber=phone_number FROM deleted WHERE user_Id=@userId
 
 SET @AuditText = ' user  with id= ' +@userId+' Changed'
 
@@ -288,22 +284,59 @@ INSERT INTO tbl_users_Audit VALUES (@AuditText)
 DELETE FROM #TempTable WHERE user_Id=@UserId
 END
 END
+
+
+UPDATE tbl_users SET Name='JANE',phone_number='9899329123'  WHERE user_id='U11';
+
 SELECT * FROM tbl_users;
 SELECT * FROM tbl_users_Audit
 
-UPDATE tbl_users SET Name='JANE',phoneNumber='9899329123'  WHERE user_id='U11';
+
+--DDL TRIGGER
+--Audit Table for DDL Triggers
+CREATE TABLE tbl_Audit(
+databaseName VARCHAR(30),
+tableName VARCHAR(30),
+eventType VARCHAR(30),
+loginName VARCHAR(30),
+sqlCommand VARCHAR(2000),
+auditDateTime DATETIME
+);
+
+--DDL TRIGGER
+CREATE TRIGGER tr_tblAudit
+ON DATABASE
+FOR CREATE_TABLE,ALTER_TABLE,DROP_TABLE
+AS
+BEGIN
+DECLARE @EventData XML
+SELECT @EventData = EVENTDATA();
+
+INSERT INTO tbl_Audit (databaseName,tableName,eventType,loginName,sqlCommand,auditDateTime) VALUES
+(
+@EventData.value('(/EVENT_INSTANCE/DatabaseName)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/ObjectName)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/EventType)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/LoginName)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/TSQLCommand)[1]','VARCHAR(2000)'),
+GETDATE()
+)
+END
+
+ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(30);
+SELECT * FROM tbl_Audit;
 
 
 --STORED PROC 1
-ALTER PROCEDURE uspGetMovieNamesWithTheatreInfo
+CREATE PROCEDURE uspGetMovieNamesWithTheatreInfo
 AS  
 BEGIN  
-    SELECT m.title, t.name AS theatre_name, t.address AS theatre_address
+    SELECT m.title, t.theatre_name, t.theatre_address
     FROM tbl_movies m
     INNER JOIN tbl_shows s ON m.movie_id = s.movie_id
     INNER JOIN tbl_theatres t ON s.theatre_id = t.theatre_id
 END 
-EXEC spGetMovieNamesWithTheatreInfo;
+EXEC uspGetMovieNamesWithTheatreInfo;
 
 
 --STORED PROC 2
@@ -311,13 +344,13 @@ CREATE PROCEDURE uspGetShowInfoByMovieNameWithTheatreInfo
     @movie_name VARCHAR(30)
 AS
 BEGIN
-    SELECT tbl_shows.show_id, tbl_shows.show_time, tbl_theatres.name AS theatre_name, tbl_theatres.address AS theatre_address
+    SELECT tbl_shows.show_id, tbl_shows.show_time, tbl_theatres.theatre_name, tbl_theatres.theatre_address
     FROM tbl_shows
     INNER JOIN tbl_movies ON tbl_shows.movie_id = tbl_movies.movie_id
     INNER JOIN tbl_theatres ON tbl_shows.theatre_id = tbl_theatres.theatre_id
     WHERE tbl_movies.title = @movie_name
 END
-EXEC spGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
+EXEC uspGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
 
 
 
@@ -325,16 +358,16 @@ EXEC spGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
 CREATE PROCEDURE uspGetShowsWithTheatreInfo
 AS
 BEGIN
-    SELECT s.show_id, m.title AS movie_name, t.name AS theatre_name, t.address AS theatre_location, s.show_time
+    SELECT s.show_id, m.title AS movie_name, t.theatre_name, t.theatre_address, s.show_time
     FROM tbl_shows s
     INNER JOIN tbl_movies m ON s.movie_id = m.movie_id
     INNER JOIN tbl_theatres t ON s.theatre_id = t.theatre_id
 END
-EXEC spGetShowsWithTheatreInfo
+EXEC uspGetShowsWithTheatreInfo
 
 
 --STORED PROC 4
-ALTER PROCEDURE uspGetAverageReviewByMovieName
+CREATE PROCEDURE uspGetAverageReviewByMovieName
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -343,7 +376,7 @@ BEGIN
     INNER JOIN tbl_movies m ON r.movie_id = m.movie_id
     WHERE m.title = @movie_name;
 END
-EXEC spGetAverageReviewByMovieName 'Avengers: Endgame';
+EXEC uspGetAverageReviewByMovieName 'Avengers: Endgame';
 
 
 --STORED PROC 5
@@ -408,6 +441,6 @@ BEGIN
 END
 
 
-EXEC spCheckAndBookTickets 'u7', 'sh4', 5
+EXEC uspCheckAndBookTickets 'u7', 'sh4', 5
 SELECT * FROM tbl_bookings
 SELECT * FROM tbl_ticket
