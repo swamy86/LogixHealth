@@ -168,13 +168,15 @@ CREATE TABLE tbl_Reviews (
     review_id VARCHAR(10) PRIMARY KEY,
     movie_id VARCHAR(10) NOT NULL,
     user_id VARCHAR(10) NOT NULL,
-    rating TINYINT NOT NULL,
+    rating TINYINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment VARCHAR(1000),
     FOREIGN KEY (user_id) REFERENCES tbl_Users(user_Id),
     FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
     CONSTRAINT review_info UNIQUE(user_id,movie_id)
 );
-
+SELECT * FROM tbl_Reviews
+DELETE FROM tbl_Reviews
+/*
 INSERT INTO tbl_Reviews (review_id,movie_id, user_id, rating, comment)
 VALUES
 ('r1','m1', 'u1', 4, 'Great movie! The action scenes were amazing.'),
@@ -187,6 +189,21 @@ VALUES
 ('r8','m4', 'u8', 4, 'A mind-bending movie with a great storyline.'),
 ('r9','m4', 'u9', 3, 'I had a hard time following the movie at times.'),
 ('r10','m5', 'u10', 5, 'A beautiful and heart-wrenching love story.');
+*/
+
+DELETE FROM tbl_Reviews
+SELECT * FROM tbl_Reviews
+
+CREATE TABLE tbl_MovieRevenue (
+    revenue_id VARCHAR(10) PRIMARY KEY,
+    movie_id VARCHAR(10) NOT NULL,
+    start_date SMALLDATETIME NOT NULL,
+    end_date SMALLDATETIME NOT NULL,
+    revenue DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id)
+);
+
+
 
 
 --Audit table for movies
@@ -513,3 +530,65 @@ BEGIN
     WHERE tbl_Movies.title = @movie_name
 END
 EXEC uspCalculateMovieRevenue 'The Dark Knight'
+
+
+--STORED PROC 7
+ALTER PROCEDURE uspGetMovieDateRange
+    @movie_id VARCHAR(10),
+    @first_date SMALLDATETIME OUTPUT,
+    @last_date SMALLDATETIME OUTPUT
+AS
+BEGIN
+    SELECT @first_date = MIN(show_time), @last_date = MAX(show_time)
+    FROM tbl_Shows
+    WHERE movie_id = @movie_id
+END
+
+DECLARE @start_date SMALLDATETIME
+DECLARE @end_date SMALLDATETIME
+EXEC uspGetMovieDateRange 'M2',@start_date OUTPUT,@end_date OUTPUT
+PRINT @start_date
+PRINT @end_date
+
+
+--STORED PROC 8
+ALTER PROCEDURE uspCalculateMovieRevenueBetweenDate
+    @movie_id VARCHAR(10)
+AS
+BEGIN
+    DECLARE @start_date SMALLDATETIME
+    DECLARE @end_date SMALLDATETIME
+    DECLARE @revenue DECIMAL(10, 2)
+
+    -- Call uspGetMovieDateRange to get the first and last date of the movie
+    EXEC uspGetMovieDateRange @movie_id, @start_date OUTPUT, @end_date OUTPUT
+
+    -- Calculate the revenue between the retrieved start and end dates
+    SELECT @revenue = SUM(total_price)
+    FROM tbl_Bookings
+    INNER JOIN tbl_Shows ON tbl_Bookings.show_id = tbl_Shows.show_id
+    WHERE tbl_Shows.movie_id = @movie_id
+        AND tbl_Bookings.booking_time BETWEEN @start_date AND @end_date
+
+    -- Retrieve the max available revenue number
+    DECLARE @max_revenue_number INT;
+    DECLARE @revenue_id VARCHAR(10);
+    SELECT @max_revenue_number = ISNULL(MAX(CAST(SUBSTRING(revenue_id, 2, LEN(revenue_id)) AS INT)), 0)
+    FROM tbl_MovieRevenue;
+	
+    -- Increment the revenue number and construct the revenue ID
+    SET @max_revenue_number = @max_revenue_number + 1;
+    SET @revenue_id = CONCAT('r', @max_revenue_number);
+
+    -- Insert the revenue record into tbl_MovieRevenue
+    INSERT INTO tbl_MovieRevenue (revenue_id, movie_id, start_date, end_date, revenue)
+    VALUES (@revenue_id, @movie_id, @start_date, @end_date, @revenue)
+END
+
+
+EXEC uspCalculateMovieRevenueBetweenDate 'm1'
+EXEC uspCalculateMovieRevenueBetweenDate 'm2'
+EXEC uspCalculateMovieRevenueBetweenDate 'm3'
+EXEC uspCalculateMovieRevenueBetweenDate 'm4'
+EXEC uspCalculateMovieRevenueBetweenDate 'm5'
+select * from tbl_MovieRevenue
