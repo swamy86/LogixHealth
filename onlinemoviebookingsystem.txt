@@ -2,10 +2,10 @@
 -- Users table
 CREATE TABLE tbl_Users (
     user_id VARCHAR(10) PRIMARY KEY,
-    name VARCHAR(30) NOT NULL,
-    email VARCHAR(40) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
     phone_number CHAR(10) NOT NULL UNIQUE CHECK (phone_number LIKE '[6789]%' AND LEN(phone_number) = 10),
-    created_at DATETIME DEFAULT GETDATE()
+    created_at SMALLDATETIME DEFAULT GETDATE()
 );
 INSERT INTO tbl_Users (user_Id, name, email, phone_number) VALUES 
   ('U1', 'johnsmith', 'johnsmith@example.com', '9876457888'),
@@ -78,7 +78,7 @@ CREATE TABLE tbl_Shows (
     movie_id VARCHAR(10) NOT NULL,
     screen_id VARCHAR(10) NOT NULL,
 	theatre_id VARCHAR(10) NOT NULL,
-	show_time DATETIME NOT NULL,
+	show_time SMALLDATETIME NOT NULL,
     price SMALLINT NOT NULL,
     available_seats SMALLINT NOT NULL,
     FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
@@ -87,14 +87,21 @@ CREATE TABLE tbl_Shows (
 );
 INSERT INTO tbl_Shows (show_id, movie_id, screen_id, theatre_id, show_time, price, available_seats)
 VALUES
-('sh1', 'm1', 'sc1', 't1', '2023-05-13 18:00:00', 200, 80),
-('sh2', 'm2', 'sc2', 't1', '2023-05-13 20:30:00', 200, 80),
-('sh3', 'm3', 'sc3', 't2', '2023-05-14 12:30:00', 200, 100),
-('sh4', 'm4', 'sc4', 't3', '2023-05-13 19:00:00', 200, 100),
-('sh5', 'm5', 'sc5', 't4', '2023-05-13 09:30:00', 200, 100),
-('sh6', 'm1', 'sc6', 't2', '2023-05-13 09:30:00', 200, 100),
-('sh7', 'm2', 'sc7', 't3', '2023-05-13 09:30:00', 200, 100),
-('sh8', 'm1', 'sc8', 't4', '2023-05-13 18:00:00', 200, 100);
+('sh1', 'm1', 'sc1', 't1', '2023-05-24 09:00:00', 200, 80),
+('sh2', 'm2', 'sc2', 't1', '2023-05-23 09:30:00', 200, 80),
+('sh3', 'm3', 'sc3', 't2', '2023-05-24 12:30:00', 200, 100),
+('sh4', 'm4', 'sc4', 't3', '2023-05-23 12:00:00', 200, 100),
+('sh5', 'm5', 'sc5', 't4', '2023-05-23 14:30:00', 200, 100),
+('sh6', 'm1', 'sc6', 't2', '2023-05-23 16:30:00', 200, 100),
+('sh7', 'm2', 'sc7', 't3', '2023-05-24 21:30:00', 200, 100),
+('sh8', 'm1', 'sc8', 't4', '2023-05-24 18:00:00', 200, 100),
+('sh9', 'm1', 'sc1', 't1', '2023-05-27 09:00:00', 200, 80),
+('sh10', 'm2', 'sc1', 't1', '2023-05-27 14:00:00', 200, 80),
+('sh11', 'm3', 'sc2', 't1', '2023-05-28 18:00:00', 200, 100),
+('sh12', 'm4', 'sc3', 't2', '2023-05-27 18:00:00', 200, 100),
+('sh13', 'm5', 'sc4', 't3', '2023-05-28 18:00:00', 200, 100);
+
+
 
 
 -- Bookings table
@@ -105,7 +112,7 @@ CREATE TABLE tbl_Bookings (
     payment_status VARCHAR(10),
     total_tickets TINYINT NOT NULL CHECK (total_tickets >= 0 AND total_tickets <= 10),
     total_price SMALLINT NOT NULL,
-    booking_time DATETIME DEFAULT GETDATE(),
+    booking_time SMALLDATETIME DEFAULT GETDATE(),
     FOREIGN KEY (user_id) REFERENCES tbl_Users(user_id),
     FOREIGN KEY (show_id) REFERENCES tbl_Shows(show_id)
 );
@@ -121,35 +128,39 @@ VALUES
 ('b7', 'u8', 'sh3',2, 400,'success');
 
 
-CREATE Table tbl_Ticket(
-Ticket_ID varchar(10) PRIMARY KEY,
-Booking_ID varchar(10),
-Price SMALLINT NOT NULL,
-Foreign Key(Booking_ID) REFERENCES tbl_Bookings(Booking_ID)
+CREATE TABLE tbl_Ticket (
+    Ticket_ID VARCHAR(10) PRIMARY KEY,
+    Booking_ID VARCHAR(10),
+	Show_ID VARCHAR(10) NOT NULL,
+    Seat_Number VARCHAR(10) NOT NULL,
+    Price SMALLINT NOT NULL,
+    FOREIGN KEY (Booking_ID) REFERENCES tbl_Bookings(Booking_ID),
+    FOREIGN KEY (Show_ID) REFERENCES tbl_Shows(Show_ID),
+    CONSTRAINT UC_Ticket UNIQUE (Seat_Number, Show_ID)
 );
 INSERT INTO tbl_Ticket VALUES
-('tk1','b1',200),
-('tk2','b1',200),
-('tk3','b1',200),
-('tk4','b1',200),
-('tk5','b1',200),
-('tk6','b2',200),
-('tk7','b2',200),
-('tk8','b2',200),
-('tk9','b2',200),
-('tk10','b2',200),
-('tk11','b3',200),
-('tk12','b3',200),
-('tk13','b3',200),
-('tk14','b4',200),
-('tk15','b5',200),
-('tk16','b5',200),
-('tk17','b5',200),
-('tk18','b5',200),
-('tk19','b6',200),
-('tk20','b6',200),
-('tk21','b7',200),
-('tk22','b7',200);
+('tk1','b1','sh1','s1',200),
+('tk2','b1','sh1','s2',200),
+('tk3','b1','sh1','s3',200),
+('tk4','b1','sh1','s4',200),
+('tk5','b1','sh1','s5',200),
+('tk6','b2','sh2','s1',200),
+('tk7','b2','sh2','s2',200),
+('tk8','b2','sh2','s3',200),
+('tk9','b2','sh2','s4',200),
+('tk10','b2','sh2','s5',200),
+('tk11','b3','sh3','s1',200),
+('tk12','b3','sh3','s2',200),
+('tk13','b3','sh3','s3',200),
+('tk14','b4','sh4','s1',200),
+('tk15','b5','sh5','s1',200),
+('tk16','b5','sh5','s2',200),
+('tk17','b5','sh5','s3',200),
+('tk18','b5','sh5','s4',200),
+('tk19','b6','sh2','s6',200),
+('tk20','b6','sh2','s7',200),
+('tk21','b7','sh3','s4',200),
+('tk22','b7','sh3','s5',200);
 
 
 -- Reviews table
@@ -163,6 +174,7 @@ CREATE TABLE tbl_Reviews (
     FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id),
     CONSTRAINT review_info UNIQUE(user_id,movie_id)
 );
+
 INSERT INTO tbl_Reviews (review_id,movie_id, user_id, rating, comment)
 VALUES
 ('r1','m1', 'u1', 4, 'Great movie! The action scenes were amazing.'),
@@ -294,7 +306,7 @@ SELECT * FROM tbl_users_Audit
 
 --DDL TRIGGER
 --Audit Table for DDL Triggers
-CREATE TABLE tbl_Audit(
+CREATE TABLE tbl_DB_Audit(
 databaseName VARCHAR(30),
 tableName VARCHAR(30),
 eventType VARCHAR(30),
@@ -304,7 +316,7 @@ auditDateTime DATETIME
 );
 
 --DDL TRIGGER
-CREATE TRIGGER tr_tblAudit
+ALTER TRIGGER tr_tblAudit
 ON DATABASE
 FOR CREATE_TABLE,ALTER_TABLE,DROP_TABLE
 AS
@@ -312,7 +324,7 @@ BEGIN
 DECLARE @EventData XML
 SELECT @EventData = EVENTDATA();
 
-INSERT INTO tbl_Audit (databaseName,tableName,eventType,loginName,sqlCommand,auditDateTime) VALUES
+INSERT INTO tbl_DB_Audit (databaseName,tableName,eventType,loginName,sqlCommand,auditDateTime) VALUES
 (
 @EventData.value('(/EVENT_INSTANCE/DatabaseName)[1]','VARCHAR(30)'),
 @EventData.value('(/EVENT_INSTANCE/ObjectName)[1]','VARCHAR(30)'),
@@ -323,24 +335,26 @@ GETDATE()
 )
 END
 
-ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(30);
-SELECT * FROM tbl_Audit;
+ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(20);
+SELECT * FROM tbl_DB_Audit;
 
 
 --STORED PROC 1
-CREATE PROCEDURE uspGetMovieNamesWithTheatreInfo
+ALTER PROCEDURE uspGetMovieNamesWithTheatreInfo
 AS  
 BEGIN  
     SELECT m.title, t.theatre_name, t.theatre_address
     FROM tbl_movies m
     INNER JOIN tbl_shows s ON m.movie_id = s.movie_id
     INNER JOIN tbl_theatres t ON s.theatre_id = t.theatre_id
+    WHERE s.show_time > GETDATE()
 END 
+
 EXEC uspGetMovieNamesWithTheatreInfo;
 
 
 --STORED PROC 2
-CREATE PROCEDURE uspGetShowInfoByMovieNameWithTheatreInfo
+ALTER PROCEDURE uspGetShowInfoByMovieNameWithTheatreInfo
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -349,57 +363,82 @@ BEGIN
     INNER JOIN tbl_movies ON tbl_shows.movie_id = tbl_movies.movie_id
     INNER JOIN tbl_theatres ON tbl_shows.theatre_id = tbl_theatres.theatre_id
     WHERE tbl_movies.title = @movie_name
+    AND tbl_shows.show_time > GETDATE()
 END
+
 EXEC uspGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
 
 
 
 --Stored proc 3
-CREATE PROCEDURE uspGetShowsWithTheatreInfo
+ALTER PROCEDURE uspGetShowsWithTheatreInfo
 AS
 BEGIN
     SELECT s.show_id, m.title AS movie_name, t.theatre_name, t.theatre_address, s.show_time
     FROM tbl_shows s
     INNER JOIN tbl_movies m ON s.movie_id = m.movie_id
     INNER JOIN tbl_theatres t ON s.theatre_id = t.theatre_id
+    WHERE s.show_time > GETDATE()
 END
-EXEC uspGetShowsWithTheatreInfo
+
+EXEC uspGetShowsWithTheatreInfo;
 
 
 --STORED PROC 4
-CREATE PROCEDURE uspGetAverageReviewByMovieName
+ALTER PROCEDURE uspGetAverageReviewByMovieName
     @movie_name VARCHAR(30)
 AS
 BEGIN
-    SELECT AVG(rating) AS avg_rating
+    SELECT ROUND(AVG(CAST(rating AS DECIMAL(10,1))), 1) AS avg_rating
     FROM tbl_reviews r
     INNER JOIN tbl_movies m ON r.movie_id = m.movie_id
     WHERE m.title = @movie_name;
 END
+
 EXEC uspGetAverageReviewByMovieName 'Avengers: Endgame';
 
 
 --STORED PROC 5
-CREATE PROCEDURE uspCheckAndBookTickets
+ALTER PROCEDURE uspCheckAndBookTickets
     @user_id VARCHAR(10),
     @show_id VARCHAR(10),
     @total_tickets INT
 AS
 BEGIN
-    
     DECLARE @available_tickets INT;
     DECLARE @booking_id VARCHAR(10);
     DECLARE @ticket_id VARCHAR(20);
     DECLARE @ticket_price INT;
+    DECLARE @show_time SMALLDATETIME;
+    DECLARE @current_date SMALLDATETIME;
+    DECLARE @max_seat_number INT;
+	DECLARE @max_ticket_number INT;
+	DECLARE @max_booking_number INT;
 
-    -- Check if the show exists and has enough available seats
-    SELECT @available_tickets = available_seats
+    -- Check if the show exists and retrieve show time
+    SELECT @available_tickets = available_seats, @show_time = show_time
     FROM tbl_shows
-    WHERE show_id = @show_id AND available_seats >= @total_tickets;
+    WHERE show_id = @show_id;
 
     IF @available_tickets IS NULL
     BEGIN
         RAISERROR('Tickets not available for the selected show', 16, 1);
+        RETURN;
+    END
+
+    -- Check if the current date is less than show time
+    SET @current_date = GETDATE();
+
+    IF @current_date >= @show_time
+    BEGIN
+        RAISERROR('Cannot book tickets for a past or ongoing show', 16, 1);
+        RETURN;
+    END
+
+    -- Check if the show has enough available seats
+    IF @available_tickets < @total_tickets
+    BEGIN
+        RAISERROR('Insufficient seats available for the selected show', 16, 1);
         RETURN;
     END
 
@@ -416,23 +455,38 @@ BEGIN
     DECLARE @total_price INT;
     SET @total_price = @ticket_price * @total_tickets;
 
+	-- Retrieve the max available booking number
+    SELECT @max_booking_number = ISNULL(MAX(CAST(SUBSTRING(booking_id, 2, LEN(booking_id)) AS INT)), 0)
+    FROM tbl_Bookings;
     -- Insert the booking record
-	DECLARE @countBookingtbl INT
-    SELECT @countBookingtbl= COUNT(*) FROM tbl_bookings;
-    SET @booking_id = CONCAT('b', @countBookingtbl+1);
+	SET @max_booking_number= @max_booking_number+1;
+    SET @booking_id = CONCAT('b', @max_booking_number);
+
+
     INSERT INTO tbl_bookings (booking_id, user_id, show_id, total_tickets, total_price, payment_status)
     VALUES (@booking_id, @user_id, @show_id, @total_tickets, @total_price, 'success');
 
-    -- Insert the ticket records
+
+	-- Retrieve the max available ticket number
+    SELECT @max_ticket_number = ISNULL(MAX(CAST(SUBSTRING(Ticket_ID, 3, LEN(Ticket_ID)) AS INT)), 0)
+    FROM tbl_ticket;
+    -- Retrieve the max available seat number for the show
+    SELECT @max_seat_number = ISNULL(MAX(CAST(SUBSTRING(Seat_Number, 2, LEN(Seat_Number)) AS INT)), 0)
+    FROM tbl_ticket
+    WHERE Show_ID = @show_id;
+
+    -- Insert the ticket records with seat numbers
     DECLARE @i INT;
     SET @i = 1;
     WHILE @i <= @total_tickets
     BEGIN
-	   DECLARE @counttickettbl INT
-       SELECT @counttickettbl= COUNT(*) FROM tbl_ticket;
-       SET @ticket_id = CONCAT('t', @counttickettbl+1);
-        INSERT INTO tbl_Ticket (Ticket_ID, Booking_ID, Price)
-        VALUES (@ticket_id, @booking_id, @ticket_price);
+        SET @max_seat_number = @max_seat_number + 1;
+		SET @max_ticket_number= @max_ticket_number+1;
+        SET @ticket_id = CONCAT('tk', @max_ticket_number);
+
+        INSERT INTO tbl_Ticket (Ticket_ID, Booking_ID, Seat_Number, Price, Show_ID)
+        VALUES (@ticket_id, @booking_id, CONCAT('s', @max_seat_number), @ticket_price, @show_id);
+
         SET @i = @i + 1;
     END
 
@@ -441,6 +495,21 @@ BEGIN
 END
 
 
-EXEC uspCheckAndBookTickets 'u7', 'sh4', 5
+
+EXEC uspCheckAndBookTickets 'u10', 'sh12', 5
 SELECT * FROM tbl_bookings
 SELECT * FROM tbl_ticket
+
+
+--STORED PROC 6
+CREATE PROCEDURE uspCalculateMovieRevenue
+    @movie_name VARCHAR(30)
+AS
+BEGIN
+    SELECT SUM(total_price) AS revenue
+    FROM tbl_Bookings
+    INNER JOIN tbl_Shows ON tbl_Bookings.show_id = tbl_Shows.show_id
+    INNER JOIN tbl_Movies ON tbl_Shows.movie_id = tbl_Movies.movie_id
+    WHERE tbl_Movies.title = @movie_name
+END
+EXEC uspCalculateMovieRevenue 'The Dark Knight'
