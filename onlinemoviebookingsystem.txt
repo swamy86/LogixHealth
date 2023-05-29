@@ -95,11 +95,11 @@ VALUES
 ('sh6', 'm1', 'sc6', 't2', '2023-05-23 16:30:00', 200, 100),
 ('sh7', 'm2', 'sc7', 't3', '2023-05-24 21:30:00', 200, 100),
 ('sh8', 'm1', 'sc8', 't4', '2023-05-24 18:00:00', 200, 100),
-('sh9', 'm1', 'sc1', 't1', '2023-05-27 09:00:00', 200, 80),
-('sh10', 'm2', 'sc1', 't1', '2023-05-27 14:00:00', 200, 80),
-('sh11', 'm3', 'sc2', 't1', '2023-05-28 18:00:00', 200, 100),
-('sh12', 'm4', 'sc3', 't2', '2023-05-27 18:00:00', 200, 100),
-('sh13', 'm5', 'sc4', 't3', '2023-05-28 18:00:00', 200, 100);
+('sh9', 'm1', 'sc1', 't1', '2023-05-30 09:00:00', 200, 80),
+('sh10', 'm2', 'sc1', 't1', '2023-05-30 14:00:00', 200, 80),
+('sh11', 'm3', 'sc2', 't1', '2023-05-31 18:00:00', 200, 100),
+('sh12', 'm4', 'sc3', 't2', '2023-05-30 18:00:00', 200, 100),
+('sh13', 'm5', 'sc4', 't3', '2023-05-31 18:00:00', 200, 100);
 
 
 
@@ -191,8 +191,7 @@ VALUES
 ('r10','m5', 'u10', 5, 'A beautiful and heart-wrenching love story.');
 */
 
-DELETE FROM tbl_Reviews
-SELECT * FROM tbl_Reviews
+
 
 CREATE TABLE tbl_MovieRevenue (
     revenue_id VARCHAR(10) PRIMARY KEY,
@@ -206,158 +205,8 @@ CREATE TABLE tbl_MovieRevenue (
 
 
 
---Audit table for movies
-CREATE TABLE tbl_Movies_Audit(Id INT IDENTITY, AuditData VARCHAR(1000));
-SELECT * FROM tbl_Movies_Audit;
-
---Triggers
---Insert Trigger
-CREATE TRIGGER tr_tbl_Movies_ForInsert
-ON tbl_movies
-FOR INSERT
-AS
-BEGIN
-DECLARE @Id VARCHAR(10)
-SELECT @Id=movie_Id FROM inserted
-INSERT INTO tbl_Movies_Audit VALUES(' New movie with Id= '+@ID+' is added at '+CAST(GETDATE() AS VARCHAR))
-END
-
-INSERT INTO tbl_movies (movie_id, title, description, duration, release_date) VALUES ('M6', 'Forrest Gump', 'The presidencies of Kennedy and Johnson, the events of Vietnam, Watergate, and other historical events unfold through the perspective of an Alabama man with an IQ of 75.', 142, '2023-04-20');
-SELECT * FROM tbl_movies;
-SELECT * FROM tbl_Movies_Audit;
-
---Delete Trigger
-CREATE TRIGGER tr_tbl_Movies_ForDelete
-ON tbl_movies
-FOR DELETE
-AS
-BEGIN
-DECLARE @Id VARCHAR(10)
-SELECT @Id=movie_Id FROM deleted
-INSERT INTO tbl_Movies_Audit VALUES(' An Existing movie with Id= '+@ID+' is deleted at '+CAST(GETDATE() AS VARCHAR))
-END
-
-DELETE FROM tbl_movies WHERE movie_id='M6';
-SELECT * FROM tbl_movies;
-SELECT * FROM tbl_Movies_Audit;
-
-
-
-CREATE TABLE tbl_users_Audit(Id INT IDENTITY, AuditData VARCHAR(1000));
-SELECT * FROM tbl_users_Audit;
-
---Insert Trigger
-CREATE TRIGGER tr_tbl_Users_ForInsert
-ON tbl_users
-FOR INSERT
-AS
-BEGIN
-DECLARE @Id varchar(10)
-SELECT @Id=User_Id FROM inserted
-INSERT INTO tbl_users_Audit VALUES(' New User with Id= '+CAST(@ID AS VARCHAR)+' is added at '+CAST(GETDATE() AS VARCHAR))
-END
-
-
-INSERT INTO tbl_users (user_Id, Name, email, phone_number) VALUES ('U11', 'alex', 'alexd@example.com', '8876400800');
-SELECT * FROM tbl_users;
-SELECT * FROM tbl_users_Audit;
-
---Delete Trigger
-CREATE TRIGGER tr_tbl_Users_ForDelete
-ON tbl_users
-FOR DELETE
-AS
-BEGIN
-DECLARE @Id VARCHAR(10)
-SELECT @Id=User_Id FROM deleted
-INSERT INTO tbl_users_Audit VALUES(' An Existing user with Id= '+CAST(@ID AS VARCHAR)+' is deleted at '+CAST(GETDATE() AS VARCHAR))
-END
-
-DELETE FROM tbl_users WHERE USER_ID='U11';
-SELECT * FROM tbl_users_Audit;
-
-
---UPDATE Trigger
-CREATE TRIGGER tr_tbl_Users_ForUpdate
-ON tbl_users
-FOR UPDATE
-AS
-BEGIN
-DECLARE @userId VARCHAR(10)
-DECLARE @OldName VARCHAR (30), @NewName VARCHAR(30)
-DECLARE @OldEmail VARCHAR (30), @NewEmail VARCHAR(30)
-DECLARE @OldphoneNumber VARCHAR (30), @NewphoneNumber VARCHAR(30)
-
-DECLARE @AuditText VARCHAR(1000);
-
-SELECT * INTO #TempTable FROM inserted
-
-WHILE(EXISTS(SELECT @userId FROM #TempTable))
-BEGIN
-SET @AuditText=''
-
-SELECT TOP 1 @userId=user_Id,@NewName=name,@NewEmail=email,@NewphoneNumber=phone_number FROM #TempTable
-SELECT @OldName=name,@OldEmail=email,@OldphoneNumber=phone_number FROM deleted WHERE user_Id=@userId
-
-SET @AuditText = ' user  with id= ' +@userId+' Changed'
-
-if(@OldName<> @NewName)
-SET @AuditText = @AuditText+ ' name from '+@OldName+ ' to '+ @NewName
-
-if(@OldEmail<> @NewEmail)
-SET @AuditText = @AuditText+ ' email from '+@OldEmail+ ' to '+ @NewEmail
-
-if(@OldphoneNumber<> @NewphoneNumber)
-SET @AuditText = @AuditText+ ' number from '+@OldphoneNumber+ ' to '+ @NewphoneNumber
-INSERT INTO tbl_users_Audit VALUES (@AuditText)
-DELETE FROM #TempTable WHERE user_Id=@UserId
-END
-END
-
-
-UPDATE tbl_users SET Name='JANE',phone_number='9899329123'  WHERE user_id='U11';
-
-SELECT * FROM tbl_users;
-SELECT * FROM tbl_users_Audit
-
-
---DDL TRIGGER
---Audit Table for DDL Triggers
-CREATE TABLE tbl_DB_Audit(
-databaseName VARCHAR(30),
-tableName VARCHAR(30),
-eventType VARCHAR(30),
-loginName VARCHAR(30),
-sqlCommand VARCHAR(2000),
-auditDateTime DATETIME
-);
-
---DDL TRIGGER
-ALTER TRIGGER tr_tblAudit
-ON DATABASE
-FOR CREATE_TABLE,ALTER_TABLE,DROP_TABLE
-AS
-BEGIN
-DECLARE @EventData XML
-SELECT @EventData = EVENTDATA();
-
-INSERT INTO tbl_DB_Audit (databaseName,tableName,eventType,loginName,sqlCommand,auditDateTime) VALUES
-(
-@EventData.value('(/EVENT_INSTANCE/DatabaseName)[1]','VARCHAR(30)'),
-@EventData.value('(/EVENT_INSTANCE/ObjectName)[1]','VARCHAR(30)'),
-@EventData.value('(/EVENT_INSTANCE/EventType)[1]','VARCHAR(30)'),
-@EventData.value('(/EVENT_INSTANCE/LoginName)[1]','VARCHAR(30)'),
-@EventData.value('(/EVENT_INSTANCE/TSQLCommand)[1]','VARCHAR(2000)'),
-GETDATE()
-)
-END
-
-ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(20);
-SELECT * FROM tbl_DB_Audit;
-
-
 --STORED PROC 1
-ALTER PROCEDURE uspGetMovieNamesWithTheatreInfo
+CREATE PROCEDURE uspGetMovieNamesWithTheatreInfo
 AS  
 BEGIN  
     SELECT m.title, t.theatre_name, t.theatre_address
@@ -371,7 +220,7 @@ EXEC uspGetMovieNamesWithTheatreInfo;
 
 
 --STORED PROC 2
-ALTER PROCEDURE uspGetShowInfoByMovieNameWithTheatreInfo
+CREATE PROCEDURE uspGetShowInfoByMovieNameWithTheatreInfo
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -388,7 +237,7 @@ EXEC uspGetShowInfoByMovieNameWithTheatreInfo 'The Dark Knight';
 
 
 --Stored proc 3
-ALTER PROCEDURE uspGetShowsWithTheatreInfo
+CREATE PROCEDURE uspGetShowsWithTheatreInfo
 AS
 BEGIN
     SELECT s.show_id, m.title AS movie_name, t.theatre_name, t.theatre_address, s.show_time
@@ -402,7 +251,7 @@ EXEC uspGetShowsWithTheatreInfo;
 
 
 --STORED PROC 4
-ALTER PROCEDURE uspGetAverageReviewByMovieName
+CREATE PROCEDURE uspGetAverageReviewByMovieName
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -416,7 +265,7 @@ EXEC uspGetAverageReviewByMovieName 'Avengers: Endgame';
 
 
 --STORED PROC 5
-ALTER PROCEDURE uspCheckAndBookTickets
+CREATE PROCEDURE uspCheckAndBookTickets
     @user_id VARCHAR(10),
     @show_id VARCHAR(10),
     @total_tickets INT
@@ -512,14 +361,13 @@ BEGIN
 END
 
 
-
-EXEC uspCheckAndBookTickets 'u10', 'sh12', 5
+EXEC uspCheckAndBookTickets 'U5', 'sh12', 5
 SELECT * FROM tbl_bookings
 SELECT * FROM tbl_ticket
 
 
 --STORED PROC 6
-CREATE PROCEDURE uspCalculateMovieRevenue
+CREATE PROCEDURE uspCalculateMovieTotalRevenue
     @movie_name VARCHAR(30)
 AS
 BEGIN
@@ -529,11 +377,12 @@ BEGIN
     INNER JOIN tbl_Movies ON tbl_Shows.movie_id = tbl_Movies.movie_id
     WHERE tbl_Movies.title = @movie_name
 END
-EXEC uspCalculateMovieRevenue 'The Dark Knight'
+
+EXEC uspCalculateMovieTotalRevenue 'The Dark Knight'
 
 
 --STORED PROC 7
-ALTER PROCEDURE uspGetMovieDateRange
+CREATE PROCEDURE uspGetMovieDateRange
     @movie_id VARCHAR(10),
     @first_date SMALLDATETIME OUTPUT,
     @last_date SMALLDATETIME OUTPUT
@@ -544,6 +393,7 @@ BEGIN
     WHERE movie_id = @movie_id
 END
 
+
 DECLARE @start_date SMALLDATETIME
 DECLARE @end_date SMALLDATETIME
 EXEC uspGetMovieDateRange 'M2',@start_date OUTPUT,@end_date OUTPUT
@@ -552,7 +402,7 @@ PRINT @end_date
 
 
 --STORED PROC 8
-ALTER PROCEDURE uspCalculateMovieRevenueBetweenDate
+CREATE PROCEDURE uspCalculateMovieRevenueBetweenDate
     @movie_id VARCHAR(10)
 AS
 BEGIN
@@ -592,3 +442,275 @@ EXEC uspCalculateMovieRevenueBetweenDate 'm3'
 EXEC uspCalculateMovieRevenueBetweenDate 'm4'
 EXEC uspCalculateMovieRevenueBetweenDate 'm5'
 select * from tbl_MovieRevenue
+DELETE FROM tbl_MovieRevenue
+
+
+
+
+
+
+--Audit table for movies
+CREATE TABLE tbl_Movies_Audit(Id INT IDENTITY, AuditData VARCHAR(1000));
+SELECT * FROM tbl_Movies_Audit;
+
+--Triggers
+--Insert Trigger
+CREATE TRIGGER tr_tbl_Movies_ForInsert
+ON tbl_movies
+FOR INSERT
+AS
+BEGIN
+DECLARE @Id VARCHAR(10)
+SELECT @Id=movie_Id FROM inserted
+INSERT INTO tbl_Movies_Audit VALUES(' New movie with Id= '+@ID+' is added at '+CAST(GETDATE() AS VARCHAR))
+END
+
+
+INSERT INTO tbl_movies (movie_id, title, description, duration, release_date) VALUES ('M6', 'Forrest Gump', 'The presidencies of Kennedy and Johnson, the events of Vietnam, Watergate, and other historical events unfold through the perspective of an Alabama man with an IQ of 75.', 142, '2023-04-20');
+SELECT * FROM tbl_movies;
+SELECT * FROM tbl_Movies_Audit;
+
+--Delete Trigger
+CREATE TRIGGER tr_tbl_Movies_ForDelete
+ON tbl_movies
+FOR DELETE
+AS
+BEGIN
+DECLARE @Id VARCHAR(10)
+SELECT @Id=movie_Id FROM deleted
+INSERT INTO tbl_Movies_Audit VALUES(' An Existing movie with Id= '+@ID+' is deleted at '+CAST(GETDATE() AS VARCHAR))
+END
+
+DELETE FROM tbl_movies WHERE movie_id='M6';
+SELECT * FROM tbl_movies;
+SELECT * FROM tbl_Movies_Audit;
+
+
+
+CREATE TABLE tbl_users_Audit(Id INT IDENTITY, AuditData VARCHAR(1000));
+SELECT * FROM tbl_users_Audit;
+
+--Insert Trigger
+CREATE TRIGGER tr_tbl_Users_ForInsert
+ON tbl_users
+FOR INSERT
+AS
+BEGIN
+DECLARE @Id varchar(10)
+SELECT @Id=User_Id FROM inserted
+INSERT INTO tbl_users_Audit VALUES(' New User with Id= '+CAST(@ID AS VARCHAR)+' is added at '+CAST(GETDATE() AS VARCHAR))
+END
+
+
+INSERT INTO tbl_users (user_Id, Name, email, phone_number) VALUES ('U11', 'alex', 'alexd@example.com', '8876400800');
+SELECT * FROM tbl_users;
+SELECT * FROM tbl_users_Audit;
+
+
+--Delete Trigger
+CREATE TRIGGER tr_tbl_Users_ForDelete
+ON tbl_users
+FOR DELETE
+AS
+BEGIN
+DECLARE @Id VARCHAR(10)
+SELECT @Id=User_Id FROM deleted
+INSERT INTO tbl_users_Audit VALUES(' An Existing user with Id= '+CAST(@ID AS VARCHAR)+' is deleted at '+CAST(GETDATE() AS VARCHAR))
+END
+
+DELETE FROM tbl_users WHERE USER_ID='U11';
+SELECT * FROM tbl_users_Audit;
+
+
+--UPDATE Trigger
+CREATE TRIGGER tr_tbl_Users_ForUpdate
+ON tbl_users
+FOR UPDATE
+AS
+BEGIN
+DECLARE @userId VARCHAR(10)
+DECLARE @OldName VARCHAR (30), @NewName VARCHAR(30)
+DECLARE @OldEmail VARCHAR (30), @NewEmail VARCHAR(30)
+DECLARE @OldphoneNumber VARCHAR (30), @NewphoneNumber VARCHAR(30)
+
+DECLARE @AuditText VARCHAR(1000);
+
+SELECT * INTO #TempTable FROM inserted
+
+WHILE(EXISTS(SELECT @userId FROM #TempTable))
+BEGIN
+SET @AuditText=''
+
+SELECT TOP 1 @userId=user_Id,@NewName=name,@NewEmail=email,@NewphoneNumber=phone_number FROM #TempTable
+SELECT @OldName=name,@OldEmail=email,@OldphoneNumber=phone_number FROM deleted WHERE user_Id=@userId
+
+SET @AuditText = ' user  with id= ' +@userId+' Changed'
+
+if(@OldName<> @NewName)
+SET @AuditText = @AuditText+ ' name from '+@OldName+ ' to '+ @NewName
+
+if(@OldEmail<> @NewEmail)
+SET @AuditText = @AuditText+ ' email from '+@OldEmail+ ' to '+ @NewEmail
+
+if(@OldphoneNumber<> @NewphoneNumber)
+SET @AuditText = @AuditText+ ' number from '+@OldphoneNumber+ ' to '+ @NewphoneNumber
+INSERT INTO tbl_users_Audit VALUES (@AuditText)
+DELETE FROM #TempTable WHERE user_Id=@UserId
+END
+END
+
+
+UPDATE tbl_users SET Name='JANE',phone_number='9899329123'  WHERE user_id='U11';
+
+SELECT * FROM tbl_users;
+SELECT * FROM tbl_users_Audit
+
+
+--DDL TRIGGER
+--Audit Table for DDL Triggers
+CREATE TABLE tbl_DB_Audit(
+databaseName VARCHAR(30),
+tableName VARCHAR(30),
+eventType VARCHAR(30),
+loginName VARCHAR(30),
+sqlCommand VARCHAR(2000),
+auditDateTime DATETIME
+);
+
+--DDL TRIGGER
+CREATE TRIGGER tr_tblAudit
+ON DATABASE
+FOR CREATE_TABLE,ALTER_TABLE,DROP_TABLE
+AS
+BEGIN
+DECLARE @EventData XML
+SELECT @EventData = EVENTDATA();
+
+INSERT INTO tbl_DB_Audit (databaseName,tableName,eventType,loginName,sqlCommand,auditDateTime) VALUES
+(
+@EventData.value('(/EVENT_INSTANCE/DatabaseName)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/ObjectName)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/EventType)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/LoginName)[1]','VARCHAR(30)'),
+@EventData.value('(/EVENT_INSTANCE/TSQLCommand)[1]','VARCHAR(2000)'),
+GETDATE()
+)
+END
+
+ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(40);
+SELECT * FROM tbl_DB_Audit;
+
+
+
+SELECT * FROM tbl_Ticket
+
+
+--Functions
+--Function1
+ALTER FUNCTION dbo.fn_GetTotalRevenueForTheatre (@theatre_id VARCHAR(10))
+RETURNS DECIMAL(10, 2)
+AS
+BEGIN
+    DECLARE @revenue DECIMAL(10, 2);
+
+    SELECT @revenue = SUM(b.total_price)
+    FROM tbl_Bookings AS b
+    INNER JOIN tbl_Shows AS s ON b.show_id = s.show_id
+    WHERE s.theatre_id = @theatre_id
+        AND b.payment_status = 'success';
+
+    RETURN @revenue;
+END;
+
+PRINT dbo.fn_GetTotalRevenueForTheatre('t1');
+
+--Function2
+CREATE FUNCTION fn_GetUserTotalBookings(@user_id VARCHAR(10))
+RETURNS INT
+AS
+BEGIN
+    DECLARE @total_bookings INT;
+
+    SELECT @total_bookings = COUNT(*)
+    FROM tbl_Bookings
+    WHERE user_id = @user_id;
+
+    RETURN @total_bookings;
+END;
+PRINT dbo.fn_GetUserTotalBookings('u5');
+
+
+
+--Function3
+ALTER FUNCTION fn_CalculateTotalRevenueForUser(@user_id VARCHAR(10))
+RETURNS DECIMAL(10, 2)
+AS
+BEGIN
+    DECLARE @total_revenue DECIMAL(10, 2);
+
+    SELECT @total_revenue = SUM(total_price)
+    FROM tbl_Bookings
+    WHERE user_id = @user_id AND payment_status = 'success';
+
+    RETURN @total_revenue;
+END;
+PRINT dbo.fn_CalculateTotalRevenueForUser('u1');
+
+
+--Function4
+ALTER FUNCTION fn_GetUserBookingHistory(@user_id VARCHAR(10))
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT b.booking_id, m.title, s.show_time, b.total_tickets, b.total_price, b.booking_time
+    FROM tbl_Bookings AS b
+    INNER JOIN tbl_Shows AS s ON b.show_id = s.show_id
+    INNER JOIN tbl_Movies AS m ON s.movie_id = m.movie_id
+    WHERE b.user_id = @user_id
+);
+
+SELECT * FROM fn_GetUserBookingHistory('u1');
+
+
+--VIEWS
+--VIEW1
+ALTER VIEW vw_UserReviewsByMovie AS
+SELECT m.movie_id, m.title, u.user_id, u.name, r.rating, r.comment
+FROM tbl_Movies AS m
+INNER JOIN tbl_Reviews AS r ON m.movie_id = r.movie_id
+INNER JOIN tbl_Users AS u ON r.user_id = u.user_id;
+
+SELECT * FROM vw_UserReviewsByMovie;
+
+--VIEW2
+CREATE VIEW vw_PopularTheatres AS
+SELECT t.theatre_id, t.theatre_name, COUNT(*) AS total_bookings
+FROM tbl_Theatres AS t
+INNER JOIN tbl_Screens AS sc ON t.theatre_id = sc.theatre_id
+INNER JOIN tbl_Shows AS s ON sc.screen_id = s.screen_id
+INNER JOIN tbl_Bookings AS b ON s.show_id = b.show_id
+GROUP BY t.theatre_id, t.theatre_name;
+
+SELECT * FROM vw_PopularTheatres ORDER BY total_bookings DESC;
+
+
+--VIEW3
+CREATE VIEW vw_UserDetailsWithBookingSummary AS
+SELECT u.user_id, u.name, u.email, COUNT(b.booking_id) AS total_bookings, SUM(b.total_tickets) AS total_tickets, SUM(b.total_price) AS total_price
+FROM tbl_Users AS u
+INNER JOIN tbl_Bookings AS b ON u.user_id = b.user_id
+GROUP BY u.user_id, u.name, u.email;
+
+SELECT * FROM vw_UserDetailsWithBookingSummary
+
+
+--VIEW4
+ALTER VIEW vw_TopRatedMovies AS
+SELECT m.movie_id, m.title, CAST(AVG(CAST(r.rating AS DECIMAL(10, 2))) AS DECIMAL(10, 2)) AS average_rating
+FROM tbl_Movies AS m
+INNER JOIN tbl_Reviews AS r ON m.movie_id = r.movie_id
+GROUP BY m.movie_id, m.title
+HAVING AVG(r.rating) >= 4.0;
+
+SELECT * FROM vw_TopRatedMovies
