@@ -16,7 +16,7 @@ commission INT,
 deptno INT FOREIGN KEY REFERENCES tbl_department(deptno)
 );
 
---Function
+--Task:can we use table table variables in a function.
 --Conclusion: You can use temporary variables in funtions.
 CREATE FUNCTION fn_GetTotalRecords()
 RETURNS INT
@@ -33,7 +33,7 @@ PRINT dbo.fn_GetTotalRecords();
 
 --2
 --conclusion:we can use function in stored proc
-
+--function
 CREATE FUNCTION fn_CalculateTotalSalary(@departmentId INT)
 RETURNS INT
 BEGIN
@@ -62,7 +62,7 @@ END;
 
 EXEC spGetDepartmentTotalSalary 10
 
-
+--3
 -- Create a function that attempts to call a stored procedure
 --conclusion:not possible to call stored proc in a function
 CREATE FUNCTION fn_CallStoredProc()
@@ -77,9 +77,7 @@ END;
 
 PRINT dbo.fn_StoredProc()
 
-
-
-
+--4
 --Task:Create a stored proc. use stored proc in a trigger.
 --Conclusion: we can execute sp in a triggger.
 -- Create a stored procedure
