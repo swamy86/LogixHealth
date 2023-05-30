@@ -76,3 +76,37 @@ BEGIN
 END;
 
 PRINT dbo.fn_StoredProc()
+
+
+
+
+--Task:Create a stored proc. use stored proc in a trigger.
+--Conclusion: we can execute sp in a triggger.
+-- Create a stored procedure
+ALTER PROCEDURE spUpdateDepartmentLocation
+  @deptno INT
+AS
+BEGIN
+  UPDATE tbl_department
+  SET loc = 'Hyderabad'
+  WHERE deptno = @deptno;
+END;
+-- Create a trigger
+ALTER TRIGGER tr_tbl_Department_ForInsert
+ON tbl_department
+FOR INSERT
+AS
+BEGIN
+  DECLARE @deptno INT;
+  SELECT @deptno = deptno FROM inserted;
+  --execute sp within the trigger
+  EXEC spUpdateDepartmentLocation @deptno;
+END;
+
+
+select * from tbl_department
+
+BEGIN TRAN
+INSERT INTO tbl_department VALUES(70,'Marketing','Pune');
+
+ROLLBACK
