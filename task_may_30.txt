@@ -108,3 +108,51 @@ BEGIN TRAN
 INSERT INTO tbl_department VALUES(70,'Marketing','Pune');
 
 ROLLBACK
+
+
+--5
+--join function and table
+CREATE FUNCTION fn_EmployeeDetails(@jobname VARCHAR(20))
+RETURNS TABLE
+AS
+RETURN(SELECT * FROM tbl_employee WHERE job = @jobname)
+
+SELECT f1.*,dname FROM fn_EmployeeDetails('Analyst') f1 inner join tbl_department d ON f1.deptno=d.deptno
+
+--6
+--cross apply
+--similar to inner join
+SELECT * FROM tbl_department D 
+CROSS APPLY 
+   ( SELECT * FROM tbl_employee E WHERE E.deptno = D.deptno ) A 
+
+SELECT * FROM tbl_department D 
+INNER JOIN tbl_employee E ON D.deptno = E.deptno
+
+--outer apply
+--similar to outer join
+SELECT * FROM tbl_department D 
+OUTER APPLY ( SELECT * FROM tbl_employee E WHERE E.deptno = D.deptno ) A
+ 
+SELECT * FROM tbl_department D 
+LEFT OUTER JOIN tbl_employee E ON D.deptno = E.deptno 
+
+--7
+--instead of trigger
+
+ALTER TRIGGER tr_DepartmentInsert
+ON tbl_department
+INSTEAD OF INSERT
+AS
+BEGIN
+  INSERT INTO tbl_department (deptno, dname, loc)
+  SELECT deptno, dname, loc
+  FROM inserted;
+END
+
+
+BEGIN TRAN
+INSERT INTO tbl_department VALUES (70, 'Sales', 'Pune');
+
+ROLLBACK
+SELECT * FROM tbl_department;
