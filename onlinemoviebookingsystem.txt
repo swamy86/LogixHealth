@@ -7,6 +7,8 @@ CREATE TABLE tbl_Users (
     phone_number CHAR(10) NOT NULL UNIQUE CHECK (phone_number LIKE '[6789]%' AND LEN(phone_number) = 10),
     created_at SMALLDATETIME DEFAULT GETDATE()
 );
+ALTER TABLE tbl_Users
+ADD CONSTRAINT CHK_EmailHasAtSymbol CHECK (email LIKE '%@%');
 INSERT INTO tbl_Users (user_Id, name, email, phone_number) VALUES 
   ('U1', 'johnsmith', 'johnsmith@example.com', '9876457888'),
   ('U2', 'janesmith', 'janesmith@example.com', '9886457898'),
@@ -201,7 +203,7 @@ CREATE TABLE tbl_MovieRevenue (
     revenue DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (movie_id) REFERENCES tbl_Movies(movie_id)
 );
-
+SELECT * FROM tbl_MovieRevenue
 
 
 
@@ -361,7 +363,7 @@ BEGIN
 END
 
 
-EXEC uspCheckAndBookTickets 'U5', 'sh12', 5
+EXEC uspCheckAndBookTickets 'U6', 'sh12', 5
 SELECT * FROM tbl_bookings
 SELECT * FROM tbl_ticket
 
@@ -380,6 +382,11 @@ END
 
 EXEC uspCalculateMovieTotalRevenue 'The Dark Knight'
 
+SELECT *
+FROM tbl_Bookings
+    INNER JOIN tbl_Shows ON tbl_Bookings.show_id = tbl_Shows.show_id
+    INNER JOIN tbl_Movies ON tbl_Shows.movie_id = tbl_Movies.movie_id
+    WHERE tbl_Movies.title = 'The Dark Knight'
 
 --STORED PROC 7
 CREATE PROCEDURE uspGetMovieDateRange
@@ -597,7 +604,7 @@ GETDATE()
 )
 END
 
-ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(40);
+ALTER TABLE tbl_Users ALTER COLUMN name VARCHAR(30);
 SELECT * FROM tbl_DB_Audit;
 
 
@@ -670,7 +677,7 @@ RETURN
     WHERE b.user_id = @user_id
 );
 
-SELECT * FROM fn_GetUserBookingHistory('u1');
+SELECT * FROM fn_GetUserBookingHistory('u5');
 
 
 --VIEWS
@@ -707,7 +714,7 @@ SELECT * FROM vw_UserDetailsWithBookingSummary
 
 --VIEW4
 ALTER VIEW vw_TopRatedMovies AS
-SELECT m.movie_id, m.title, CAST(AVG(CAST(r.rating AS DECIMAL(10, 2))) AS DECIMAL(10, 2)) AS average_rating
+SELECT m.movie_id, m.title, CAST(AVG(CAST(r.rating AS DECIMAL(10, 2))) AS DECIMAL(10, 1)) AS average_rating
 FROM tbl_Movies AS m
 INNER JOIN tbl_Reviews AS r ON m.movie_id = r.movie_id
 GROUP BY m.movie_id, m.title
