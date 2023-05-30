@@ -1,0 +1,78 @@
+--Create DEPARTMENT table
+CREATE TABLE tbl_department(
+deptno INT PRIMARY KEY,
+dname VARCHAR(30),
+loc VARCHAR(30)
+);
+--Create employee table
+CREATE TABLE tbl_employee(
+empno INT PRIMARY KEY,
+ename VARCHAR(30),
+job VARCHAR(30),
+manager INT,
+hiredate DATE,
+salary INT,
+commission INT,
+deptno INT FOREIGN KEY REFERENCES tbl_department(deptno)
+);
+
+--Function
+--Conclusion: You can use temporary variables in funtions.
+CREATE FUNCTION fn_GetTotalRecords()
+RETURNS INT
+AS
+BEGIN
+    DECLARE @total_count INT;
+
+    SELECT @total_count = COUNT(*)
+    FROM tbl_employee
+
+    RETURN @total_count;
+END;
+PRINT dbo.fn_GetTotalRecords();
+
+--2
+--conclusion:we can use function in stored proc
+
+CREATE FUNCTION fn_CalculateTotalSalary(@departmentId INT)
+RETURNS INT
+BEGIN
+  DECLARE @totalSalary INT;
+
+  SELECT @totalSalary= SUM(salary)
+  FROM tbl_employee
+  WHERE deptno = @departmentId;
+  
+  RETURN @totalSalary;
+END;
+
+PRINT dbo.calculateTotalSalary(10)
+
+
+-- stored procedure that uses the function
+ALTER PROCEDURE spGetDepartmentTotalSalary(@departmentId INT)
+AS
+BEGIN
+  DECLARE @totalSalary INT;
+  -- Call the function
+  SET @totalSalary = dbo.fn_CalculateTotalSalary(@departmentId);
+  -- Display the result
+  SELECT CONCAT('Total salary for department ', @departmentId, ' is ', @totalSalary);
+END;
+
+EXEC spGetDepartmentTotalSalary 10
+
+
+-- Create a function that attempts to call a stored procedure
+--conclusion:not possible to call stored proc in a function
+CREATE FUNCTION fn_CallStoredProc()
+RETURNS INT
+AS
+BEGIN
+  --call stored procedure
+  EXEC spGetDepartmentTotalSalary 10;
+  
+  RETURN 0;
+END;
+
+PRINT dbo.fn_StoredProc()
