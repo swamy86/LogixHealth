@@ -1,0 +1,65 @@
+select * from tbl_employee
+select * from tbl_department
+--CTE
+
+--1
+--one table.update one table
+--possible
+WITH Employees AS
+(
+select  * from tbl_employee
+)
+update  Employees 
+set job='clerk' where ename='Kuldeep'
+
+select * from tbl_employee;
+
+
+--2
+--two tables.update one table
+--possible
+with employeesByDept
+as
+(
+select e.deptno,ename,job,dname
+from tbl_employee e
+join tbl_department d
+on e.deptno=d.deptno
+)
+
+update employeesByDept
+set job='CLERK' where ename='Amir'
+
+--3
+--two tables.update more the one table
+--not possible
+with employeesByDept
+as
+(
+select e.deptno,ename,job,dname
+from tbl_employee e
+join tbl_department d
+on e.deptno=d.deptno
+)
+
+UPDATE employeesByDept
+set job='SALESMAN',dname='Sales'
+where ename='Momin'
+
+
+
+--4
+--two tables.update one table
+--possible. not a good practice
+with employeesByDept
+as
+(
+select e.deptno,ename,job,dname
+from tbl_employee e
+join tbl_department d
+on e.deptno=d.deptno
+)
+
+UPDATE employeesByDept
+set dname='Research'
+where ename='Bina'
