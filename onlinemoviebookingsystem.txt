@@ -721,3 +721,29 @@ GROUP BY m.movie_id, m.title
 HAVING AVG(r.rating) >= 4.0;
 
 SELECT * FROM vw_TopRatedMovies
+
+--CTE
+--1
+WITH TheaterMovieRevenue AS (
+    SELECT t.theatre_id, t.theatre_name, m.movie_id, m.title, SUM(b.total_price) AS total_revenue
+    FROM tbl_Theatres t
+    INNER JOIN tbl_Screens s ON t.theatre_id = s.theatre_id
+    INNER JOIN tbl_Shows sh ON s.screen_id = sh.screen_id
+    INNER JOIN tbl_Bookings b ON sh.show_id = b.show_id
+    INNER JOIN tbl_Movies m ON sh.movie_id = m.movie_id
+    GROUP BY t.theatre_id, t.theatre_name, m.movie_id, m.title
+)
+SELECT *
+FROM TheaterMovieRevenue;
+
+
+--2
+WITH MovieRating AS (
+    SELECT m.movie_id, m.title, AVG(r.rating) AS average_rating
+    FROM tbl_Movies m
+    INNER JOIN tbl_Reviews r ON m.movie_id = r.movie_id
+    GROUP BY m.movie_id, m.title
+)
+SELECT * FROM MovieRating
+WHERE average_rating = (SELECT MAX(average_rating) FROM MovieRating)
+   OR average_rating = (SELECT MIN(average_rating) FROM MovieRating);
