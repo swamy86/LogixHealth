@@ -97,11 +97,11 @@ VALUES
 ('sh6', 'm1', 'sc6', 't2', '2023-05-23 16:30:00', 200, 100),
 ('sh7', 'm2', 'sc7', 't3', '2023-05-24 21:30:00', 200, 100),
 ('sh8', 'm1', 'sc8', 't4', '2023-05-24 18:00:00', 200, 100),
-('sh9', 'm1', 'sc1', 't1', '2023-05-30 09:00:00', 200, 80),
-('sh10', 'm2', 'sc1', 't1', '2023-05-30 14:00:00', 200, 80),
-('sh11', 'm3', 'sc2', 't1', '2023-05-31 18:00:00', 200, 100),
-('sh12', 'm4', 'sc3', 't2', '2023-05-30 18:00:00', 200, 100),
-('sh13', 'm5', 'sc4', 't3', '2023-05-31 18:00:00', 200, 100);
+('sh9', 'm1', 'sc1', 't1', '2023-06-15 09:00:00', 200, 80),
+('sh10', 'm2', 'sc1', 't1', '2023-06-15 14:00:00', 200, 80),
+('sh11', 'm3', 'sc2', 't1', '2023-06-16 18:00:00', 200, 100),
+('sh12', 'm4', 'sc3', 't2', '2023-06-17 18:00:00', 200, 100),
+('sh13', 'm5', 'sc4', 't3', '2023-06-15 18:00:00', 200, 100);
 
 
 
@@ -128,7 +128,6 @@ VALUES
 ('b5', 'u5', 'sh5',4, 800,'success'),
 ('b6', 'u7', 'sh2',2, 400,'success'),
 ('b7', 'u8', 'sh3',2, 400,'success');
-
 
 CREATE TABLE tbl_Ticket (
     Ticket_ID VARCHAR(10) PRIMARY KEY,
@@ -232,6 +231,18 @@ SELECT * FROM MovieRating
 WHERE average_rating = (SELECT MAX(average_rating) FROM MovieRating)
    OR average_rating = (SELECT MIN(average_rating) FROM MovieRating);
 
+--3
+WITH RevenueCTE AS (
+    SELECT YEAR(b.booking_time) AS Revenue_Year, MONTH(b.booking_time) AS Revenue_Month, m.title AS Movie_Name,
+    SUM(b.total_price) AS Total_Revenue
+    FROM tbl_Bookings b
+    JOIN tbl_Shows s ON b.show_id = s.show_id
+    JOIN tbl_Movies m ON s.movie_id = m.movie_id
+    GROUP BY YEAR(b.booking_time), MONTH(b.booking_time), m.title
+)
+SELECT Revenue_Year,Revenue_Month,Movie_Name,Total_Revenue
+FROM RevenueCTE
+ORDER BY Revenue_Year, Revenue_Month, Movie_Name;
 
 
 
@@ -478,8 +489,6 @@ EXEC uspCalculateMovieRevenueBetweenDate 'm4'
 EXEC uspCalculateMovieRevenueBetweenDate 'm5'
 select * from tbl_MovieRevenue
 DELETE FROM tbl_MovieRevenue
-
-
 
 
 
