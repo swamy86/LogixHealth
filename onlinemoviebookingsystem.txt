@@ -319,8 +319,8 @@ BEGIN
     DECLARE @show_time SMALLDATETIME;
     DECLARE @current_date SMALLDATETIME;
     DECLARE @max_seat_number INT;
-	DECLARE @max_ticket_number INT;
-	DECLARE @max_booking_number INT;
+    DECLARE @max_ticket_number INT;
+    DECLARE @max_booking_number INT;
 
     -- Check if the show exists and retrieve show time
     SELECT @available_tickets = available_seats, @show_time = show_time
@@ -345,7 +345,9 @@ BEGIN
     -- Check if the show has enough available seats
     IF @available_tickets < @total_tickets
     BEGIN
-        RAISERROR('Insufficient seats available for the selected show', 16, 1);
+	    DECLARE @errorMessage VARCHAR(1000);
+		SET @errorMessage = CONCAT('Insufficient seats available for the selected show. Available Tickets: ', @available_tickets);
+        RAISERROR(@errorMessage, 16, 1);
         RETURN;
     END
 
@@ -362,28 +364,28 @@ BEGIN
     DECLARE @total_price INT;
     SET @total_price = @ticket_price * @total_tickets;
 
-	-- Retrieve the max available booking number
+    -- Retrieve the max available booking number
     SELECT @max_booking_number = ISNULL(MAX(CAST(SUBSTRING(booking_id, 2, LEN(booking_id)) AS INT)), 0)
     FROM tbl_Bookings;
-    -- Insert the booking record
-	SET @max_booking_number= @max_booking_number+1;
-    SET @booking_id = CONCAT('b', @max_booking_number);
 
+    -- Insert the booking record
+    SET @max_booking_number = @max_booking_number + 1;
+    SET @booking_id = CONCAT('b', @max_booking_number);
 
     INSERT INTO tbl_bookings (booking_id, user_id, show_id, total_tickets, total_price, payment_status)
     VALUES (@booking_id, @user_id, @show_id, @total_tickets, @total_price, 'success');
 
-
-	-- Retrieve the max available ticket number
+    -- Retrieve the max available ticket number
     SELECT @max_ticket_number = ISNULL(MAX(CAST(SUBSTRING(Ticket_ID, 3, LEN(Ticket_ID)) AS INT)), 0)
     FROM tbl_ticket;
+
     -- Retrieve the max available seat number for the show
     SELECT @max_seat_number = ISNULL(MAX(CAST(SUBSTRING(Seat_Number, 2, LEN(Seat_Number)) AS INT)), 0)
     FROM tbl_ticket
-    WHERE Show_ID = @show_id;
+    WHERE show_id = @show_id;
 
-    -- Insert the ticket records with seat numbers
-    DECLARE @i INT;
+	/*
+	DECLARE @i INT;
     SET @i = 1;
     WHILE @i <= @total_tickets
     BEGIN
@@ -396,13 +398,47 @@ BEGIN
 
         SET @i = @i + 1;
     END
+	*/
+	-- Create a table variable to store the batch of ticket records
+    DECLARE @TicketBatch TABLE (
+        Ticket_ID VARCHAR(10),
+		Booking_ID VARCHAR(10),
+		Show_Id VARCHAR(10),
+        Seat_Number VARCHAR(10),
+        Price INT
+    );
+	--CTE
+    WITH TicketBatchCTE AS (
+        SELECT Number = 1
+        UNION ALL
+        SELECT Number + 1
+        FROM TicketBatchCTE
+        WHERE Number < @total_tickets
+    )
+    INSERT INTO @TicketBatch(Ticket_ID, Booking_ID,Show_ID, Seat_Number, Price)
+    SELECT 
+	    CONCAT('tk', @max_ticket_number + tb.Number),
+		@booking_id,@show_id,
+		CONCAT('s', @max_seat_number + tb.Number),
+        @ticket_price
+    FROM TicketBatchCTE tb;
 
-    -- Return the booking ID to the caller
+
+	-- Insert the ticket records from the batch into the tbl_Ticket table
+    INSERT INTO tbl_ticket (Ticket_ID, Booking_ID, Show_ID, Seat_Number, Price)
+    SELECT 
+        tb.Ticket_ID,
+        tb.Booking_ID,
+		tb.Show_ID,
+        tb.Seat_Number,
+        tb.Price
+    FROM @TicketBatch tb;
+
+    -- Return the booking ID
     SELECT @booking_id AS booking_id;
 END
 
-
-EXEC uspCheckAndBookTickets 'U6', 'sh12', 5
+EXEC uspCheckAndBookTickets 'u3','sh11', 5
 SELECT * FROM tbl_bookings
 SELECT * FROM tbl_ticket
 
